@@ -50,14 +50,16 @@ BOOTSTRAP.md runs automatically on first session. It will:
 
 ## What this gives you
 
-An agent that applies the Blast Radius Protocol to everything it builds:
+**A Sonnet or Opus agent with a good critical thinking loop can safely build production software — full-stack web apps, cloud infrastructure, backend engines, and autonomous agent systems — if every artifact is structured so any given edit touches only one concern.**
+
+The agent working on a file cannot accidentally damage adjacent logic because adjacent logic is not in that file.
+
+This pack configures your OpenClaw agent to apply that constraint across four artifact types:
 
 - **Code**: ~80-100 line files, single concern, Input/Output/Must-never contracts, pure assembly layer
 - **Scripts**: docstring contracts, self-reporting failures, orchestrators as pure wiring
 - **Crons**: one entry per script, no inline logic
 - **Agent behavior files**: soul shards loaded in order, memory shards by domain, MEMORY.md for operating rules only
-
-The agent working on any file cannot accidentally damage adjacent logic because adjacent logic is not in that file.
 
 ## Read more
 
