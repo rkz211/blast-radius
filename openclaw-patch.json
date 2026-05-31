@@ -1,0 +1,17 @@
+{
+  "_instructions": "Merge this into your openclaw.json under hooks.internal.entries. If hooks.internal.entries does not exist, create it. Then restart the gateway.",
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "bootstrap-extra-files": {
+          "enabled": true,
+          "paths": [
+            "soul-shards/*/SOUL.md",
+            "memory-shards/*/MEMORY.md"
+          ]
+        }
+      }
+    }
+  }
+}
