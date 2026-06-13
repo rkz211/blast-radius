@@ -68,6 +68,15 @@ Create the following directory structure and files under the workspace root:
 - Scripts report their own failures — agent does not diagnose script errors.
 ```
 
+### `soul-shards/03-blast-radius/SOUL.md`
+Copy this file verbatim from the pack — it is the enforcement posture that keeps the agent
+on protocol under pressure (the behavioral rail, distinct from the structural rules):
+```bash
+cp soul-shards/03-blast-radius/SOUL.md /path/to/your/workspace/soul-shards/03-blast-radius/SOUL.md
+```
+If you are assembling shards by hand, open the pack's `soul-shards/03-blast-radius/SOUL.md`
+and reproduce it exactly. It must load AFTER 02-ops and BEFORE any feature shards.
+
 ---
 
 ## Step 2 — Create memory shard files
@@ -139,6 +148,14 @@ The agent working on a file cannot accidentally damage adjacent logic because ad
 - Editing agent behavior → identify which shard, edit only that shard
 ```
 
+### `memory/blast-radius-verification.md`
+Copy this file verbatim from the pack — it is the verification gate (what an artifact must
+pass before "done") and the recovery protocol (what to do when something breaks):
+```bash
+cp memory/blast-radius-verification.md /path/to/your/workspace/memory/blast-radius-verification.md
+```
+This shard is what turns the structural rules into verified, contained changes. Do not skip it.
+
 ---
 
 ## Step 3 — Place blast-radius-v3.md in the workspace
@@ -177,8 +194,10 @@ Confirm:
 - [ ] `soul-shards/00-security/SOUL.md` exists
 - [ ] `soul-shards/01-persona/SOUL.md` exists
 - [ ] `soul-shards/02-ops/SOUL.md` exists
+- [ ] `soul-shards/03-blast-radius/SOUL.md` exists
 - [ ] `memory/blast-radius-rules.md` exists
 - [ ] `memory/blast-radius-domains.md` exists
+- [ ] `memory/blast-radius-verification.md` exists
 - [ ] `blast-radius-v3.md` exists in workspace root
 - [ ] `openclaw.json.001` created with diff shown to operator
 

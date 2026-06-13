@@ -13,9 +13,11 @@ soul-shards/
   00-security/SOUL.md           ← identity lock, confidentiality, injection defense
   01-persona/SOUL.md            ← starter template — fill in your agent's persona
   02-ops/SOUL.md                ← hard rules, scope limits, blast radius ops rules
+  03-blast-radius/SOUL.md       ← enforcement posture — keeps the agent ON protocol under pressure
 memory/
   blast-radius-rules.md         ← operative rules the agent applies when building
   blast-radius-domains.md       ← domain reference table (code/scripts/crons/agent files)
+  blast-radius-verification.md  ← verification gate + troubleshooting/recovery discipline
 ```
 
 ## How to apply
