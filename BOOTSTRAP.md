@@ -72,7 +72,7 @@ Create the following directory structure and files under the workspace root:
 Copy this file verbatim from the pack — it is the enforcement posture that keeps the agent
 on protocol under pressure (the behavioral rail, distinct from the structural rules):
 ```bash
-cp soul-shards/03-blast-radius/SOUL.md /path/to/your/workspace/soul-shards/03-blast-radius/SOUL.md
+cp soul-shards/03-blast-radius/SOUL.md <YOUR_WORKSPACE>/soul-shards/03-blast-radius/SOUL.md
 ```
 If you are assembling shards by hand, open the pack's `soul-shards/03-blast-radius/SOUL.md`
 and reproduce it exactly. It must load AFTER 02-ops and BEFORE any feature shards.
@@ -95,8 +95,9 @@ When building or editing any artifact, structure it so the edit touches only one
 The agent working on a file cannot accidentally damage adjacent logic because adjacent logic is not in the file.
 
 ## Code
-- Files: ~80-100 lines, single concern
+- Files: ~80-100 lines, single concern (heuristic — concern count is the rule, line count is the smell detector)
 - Assembly layer (App.tsx or equivalent): pure wiring only — no logic, no ternaries
+- When the assembly layer outgrows itself: shard into section sub-assemblies (App → Sections → Blocks)
 - Contract on every file (first 3 lines):
   // Input: what this block receives
   // Output: what this block produces
@@ -107,12 +108,11 @@ The agent working on a file cannot accidentally damage adjacent logic because ad
 - Each script: ~80-150 lines, one concern
 - Docstring contract at top: Input / Output / Must never
 - Scripts report their own failures via report-failure.sh — agent does not diagnose
-- Orchestrators (session-end.sh, pipeline runners): pure delegation only, zero inline logic
+- Orchestrators: pure delegation only, zero inline logic
 
 ## Crons
-- One cron entry = one script call
-- No inline logic, no pipelines, no chained commands in cron entries
-- If multiple scripts need the same schedule: write an orchestrator script, cron calls that
+- One cron entry = one script call. No inline pipelines or chained commands.
+- Logic lives in the script. The cron is the trigger only.
 
 ## Agent Behavior Files
 - MEMORY.md: operating rules only — never project facts or knowledge
@@ -121,9 +121,10 @@ The agent working on a file cannot accidentally damage adjacent logic because ad
 - When updating a shard: only that shard file is in context — adjacent shards unreachable
 
 ## Versioning
-- New version of any block: block.v2.ext alongside original
-- Swap the reference (in orchestrator or import) when verified
-- Original stays frozen until swap is confirmed working
+- New version: block.v2.ext alongside original
+- Swap the reference when verified; original stays frozen until then
+- Once v2 is stable: delete v1 in a dedicated commit (garbage collection)
+- Before declaring done: check for orphaned version files with no live import (orphan detection gate)
 ```
 
 ### `memory/blast-radius-domains.md`
@@ -133,12 +134,12 @@ The agent working on a file cannot accidentally damage adjacent logic because ad
 # Output: which domain applies, what the assembly layer is, what the contract looks like
 # Must never: contain operating rules or persona
 
-| Domain | Assembly Layer | Block Size | Contract Location |
-|---|---|---|---|
-| Code | App.tsx — pure imports + JSX | ~80-100 lines | First 3 lines: Input/Output/Must never |
-| Scripts | Orchestrator — pure delegation | ~80-150 lines | Docstring: reads/writes/must never |
-| Crons | Cron entry — one script call | N/A (logic in script) | Docstring on the script |
-| Agent files | Bootstrap loader (soul-shards/) | One concern per file | First 3 lines of each shard |
+| Domain | Assembly Layer | Block Size | Contract Location | Verification |
+|---|---|---|---|---|
+| Code | App.tsx — pure imports + JSX (scales to section sub-assemblies) | ~80-100 lines (heuristic) | First 3 lines: Input/Output/Must never | Type → Build → Deploy → Live URL |
+| Scripts | Orchestrator — pure delegation | ~80-150 lines | Docstring: reads/writes/must never | Run → Output match → Negative check |
+| Crons | Cron entry — one script call | N/A (logic in script) | Docstring on the called script | Structure → Script gate → Schedule parse |
+| Agent files | Bootstrap loader (soul-shards/) | One concern per file | First 3 lines of each shard | Isolation → Load order → Contract accuracy |
 
 ## When to Apply
 - Creating a new component, hook, or module → shard it from the start
@@ -152,37 +153,38 @@ The agent working on a file cannot accidentally damage adjacent logic because ad
 Copy this file verbatim from the pack — it is the verification gate (what an artifact must
 pass before "done") and the recovery protocol (what to do when something breaks):
 ```bash
-cp memory/blast-radius-verification.md /path/to/your/workspace/memory/blast-radius-verification.md
+cp memory/blast-radius-verification.md <YOUR_WORKSPACE>/memory/blast-radius-verification.md
 ```
 This shard is what turns the structural rules into verified, contained changes. Do not skip it.
 
 ---
 
-## Step 3 — Place blast-radius-v3.md in the workspace
+## Step 3 — Place blast-radius-v4.md in the workspace
 
 Copy the current whitepaper from this pack into the workspace root:
 
 ```bash
-cp blast-radius-v3.md /path/to/your/workspace/blast-radius-v3.md
+cp blast-radius-v4.md <YOUR_WORKSPACE>/blast-radius-v4.md
 ```
 
-`blast-radius-v3.md` is the unified, current protocol — code, scripts, crons, agent files, plus the Hologram Pyramid orientation layer and garbage-collection discipline. (The older `blast-radius-v2.md` is retained in the pack for history; do not copy it into the workspace.)
+`blast-radius-v4.md` is the current protocol — code, scripts, crons, agent files, Hologram Pyramid, verification methods, assembly scaling, and orphan detection. Prior versions are retained in the pack for history; do not copy them into the workspace.
 
 ## Step 4 — Update openclaw.json to load soul shards
 
 ⚠️ **Never edit openclaw.json directly.** Write a numbered copy, show the diff, wait for the operator to apply it.
 
-Create `/Users/calvinbot/.openclaw/openclaw.json.001` with this addition inside the `hooks.internal.entries` block:
+Create `<OPENCLAW_CONFIG_DIR>/openclaw.json.001` with this addition inside the `hooks.internal.entries` block:
 
 ```json
 "bootstrap-extra-files": {
   "enabled": true,
   "paths": [
-    "soul-shards/*/SOUL.md",
-    "memory-shards/*/MEMORY.md"
+    "soul-shards/*/SOUL.md"
   ]
 }
 ```
+
+Note: Memory files (`memory/*.md`) are loaded natively by OpenClaw via `memory_search` and `memory_get` — they do not need to be in the bootstrap hook. Only soul shards need explicit loading.
 
 Show the diff to the operator and instruct them to rename it and restart the gateway.
 
@@ -198,12 +200,12 @@ Confirm:
 - [ ] `memory/blast-radius-rules.md` exists
 - [ ] `memory/blast-radius-domains.md` exists
 - [ ] `memory/blast-radius-verification.md` exists
-- [ ] `blast-radius-v3.md` exists in workspace root
+- [ ] `blast-radius-v4.md` exists in workspace root
 - [ ] `openclaw.json.001` created with diff shown to operator
 
 Then delete this file:
 ```bash
-rm /Users/calvinbot/.openclaw/workspace-tommy/BOOTSTRAP.md
+rm <YOUR_WORKSPACE>/BOOTSTRAP.md
 ```
 
-Confirm deletion. Report to operator: "Bootstrap complete. Soul shards, memory shards, and blast-radius-v3.md are in place. Apply openclaw.json.001 and restart the gateway to activate shard loading."
+Confirm deletion. Report to operator: "Bootstrap complete. Soul shards, memory files, and blast-radius-v4.md are in place. Apply openclaw.json.001 and restart the gateway to activate shard loading."

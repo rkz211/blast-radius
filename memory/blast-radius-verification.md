@@ -26,29 +26,47 @@ When you cannot trace an error, add detailed logging before you start changing l
 - Only optimize or remove the logs after the root cause is proven.
 A fix applied without a proven cause is a new guess, not a fix.
 
-## The Verification Gate — Pass Before "Done"
+## Verification by Domain — Concrete Gates
 
 An artifact is not done until it passes the gate for its type. Never confirm completion
-without verifying output.
+without verifying output. **Verify against the deployed state, not the local state.**
 
-**Code (TypeScript / React):**
-- `npx tsc --noEmit` passes (type check) before any push that touches TS.
-- Local build passes (`npm run build`) before commit.
-- For web UI: verify against the LIVE deployed URL (e.g. Playwright), not just locally —
-  a local build verifies syntax, it does not deploy.
-- Confirm the change is actually live (version stamp, deployed job status) before reporting done.
+### Code (TypeScript / React / Web Apps)
+1. **Type gate** — `npx tsc --noEmit` passes. No push that touches TS skips this.
+2. **Build gate** — `npm run build` completes clean. Warnings acceptable; errors not.
+3. **Deploy gate** — push to deploy branch (GitHub → Amplify, or equivalent). Not "pushed"
+   until the deploy pipeline has it.
+4. **Live verification** — confirm the change is live at the deployed URL. For web apps:
+   Playwright or equivalent browser automation against production, not localhost. A local dev
+   server proves the code runs on your machine. The deploy proves it runs on infrastructure.
+5. **Version stamp** — if the artifact has a version identifier (agent stamp, build hash,
+   deploy ID), confirm the live version matches what was just pushed. Catches deploy failures
+   that return 200 with stale content.
 
-**Scripts:**
-- Run the script and confirm the actual output matches the docstring contract.
-- Confirm it took no action its "Must never" line prohibits.
+### Scripts
+1. **Run gate** — execute the script, confirm actual output matches the docstring's Output line.
+2. **Negative gate** — confirm the script did NOT do anything its "Must never" line prohibits.
+   Check for side effects: files modified, messages sent, external calls made.
+3. **Exit code** — confirm 0 on success, non-zero on failure, and the failure path calls
+   `report-failure.sh`.
 
-**Crons:**
-- Confirm the entry calls exactly one script and contains no inline logic.
-- Confirm the called script passes its own script gate.
+### Crons
+1. **Structure gate** — entry calls exactly one script. No inline logic, no pipelines.
+2. **Script gate** — the called script passes its own script verification above.
+3. **Schedule gate** — confirm the cron expression resolves to the intended time.
 
-**Agent files:**
-- Confirm only the intended shard changed (`git status` clean except that file).
-- Confirm load order is intact (numbered prefixes unchanged).
+### Agent Behavior Files
+1. **Isolation gate** — `git diff` or `git status` shows only the intended shard changed.
+2. **Load order gate** — numbered prefixes intact and in correct sequence.
+3. **Contract gate** — shard's first three lines are present and accurate for current content.
+
+## Orphan Detection Gate — All Domains
+
+Before declaring any task done, regardless of domain:
+1. Search for files with version markers (`.v1`, `.v2`, `v1.`, `v2.`, `-v1`, `-v2`).
+2. For each, check whether any live file imports, references, or calls it.
+3. If an orphan exists with no live reference: delete it in a dedicated commit. Do this in
+   the current session. Do not leave it for later — "later" means never for an agent.
 
 ## Smaller, Verified Changes
 
@@ -68,3 +86,9 @@ without verifying output.
 6. Re-run the verification gate for that artifact type.
 7. If the change made it worse: revert to the known-good checkpoint immediately. A clean
    revert beats a second speculative fix every time.
+
+## The Meta-Rule
+
+If you cannot define the verification method for an artifact before you build it, you do not
+yet understand what "done" means for that artifact. Define the gate first. Then build. Then
+pass the gate.

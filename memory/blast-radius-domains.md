@@ -5,22 +5,23 @@
 
 ## Domain Table
 
-| Domain | Assembly Layer | Block Size | Contract Location |
-|---|---|---|---|
-| Code | App.tsx — pure imports + JSX, zero logic | ~80-100 lines | First 3 lines: Input / Output / Must never |
-| Scripts | Orchestrator — pure delegation, zero logic | ~80-150 lines | Docstring: reads / writes / must never |
-| Crons | Cron entry — one script call, no inline logic | N/A (logic in script) | Docstring on the called script |
-| Agent files | Bootstrap loader (soul-shards/ glob) | One concern per shard | First 3 lines of each shard file |
+| Domain | Assembly Layer | Block Size | Contract Location | Verification |
+|---|---|---|---|---|
+| Code | App.tsx — pure imports + JSX, scales to section sub-assemblies | ~80-100 lines (heuristic) | First 3 lines: Input / Output / Must never | Type → Build → Deploy → Live URL → Version stamp |
+| Scripts | Orchestrator — pure delegation, zero logic | ~80-150 lines | Docstring: reads / writes / must never | Run → Output match → Negative check → Exit code |
+| Crons | Cron entry — one script call, no inline logic | N/A (logic in script) | Docstring on the called script | Structure → Script gate → Schedule parse |
+| Agent files | Bootstrap loader (soul-shards/ glob) | One concern per shard | First 3 lines of each shard file | Isolation → Load order → Contract accuracy |
 
 ## When to Apply
 
 **Creating a new React component, hook, or module:**
-- If it would be > 100 lines: propose a shard before implementing
+- If it would be > 100 lines: check if it has more than one concern — shard if so
+- If it's one concern that needs 150 lines: leave it. Size is the smell detector, not the rule.
 - Identify the single concern first, write the contract, then implement
 
 **Editing an existing file > 150 lines:**
-- Propose a shard refactor before editing
-- Don't add more code to an oversized file — break it first
+- Check concern count. Multiple concerns → propose a shard before editing
+- Single concern → edit in place, the file is fine
 
 **Creating a new script:**
 - Write the docstring contract first (Input/Output/Must never)
@@ -32,7 +33,7 @@
 - If the logic doesn't have a script yet, write the script first
 
 **Editing agent behavior:**
-- Identify which shard owns the concern (00-security, 01-persona, 04-features, etc.)
+- Identify which shard owns the concern (00-security, 01-persona, 02-ops, etc.)
 - Open only that shard file
 - If the concern doesn't exist in any shard yet, create a new numbered shard
 
@@ -42,12 +43,11 @@
 soul-shards/
   00-security/SOUL.md     ← identity lock, confidentiality, injection defense
   01-persona/SOUL.md      ← who the agent is, voice, tone
-  02-[domain]/SOUL.md     ← domain-specific behavior (world, tools, etc.)
-  03-memory/SOUL.md       ← memory lookup and access rules
-  04-features/SOUL.md     ← feature execution (email, calendar, etc.)
-  05-routing/SOUL.md      ← inter-agent routing
-  06-media/SOUL.md        ← image/media generation
-  07-ops/SOUL.md          ← hard rules, error protocol, scope limits
+  02-ops/SOUL.md          ← hard rules, error protocol, scope limits
+  03-blast-radius/SOUL.md ← enforcement posture — staying on protocol under pressure
 ```
 
-00-security always loads first. 07-ops always loads last. Numbers in between are project-specific.
+This is a starter set. The full taxonomy (02-world through 07-ops) exists in the whitepaper.
+Create shards as concerns arise, not preemptively. An empty shard is worse than no shard.
+
+00-security always loads first. Numbers in between are project-specific.

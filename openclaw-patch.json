@@ -7,8 +7,7 @@
         "bootstrap-extra-files": {
           "enabled": true,
           "paths": [
-            "soul-shards/*/SOUL.md",
-            "memory-shards/*/MEMORY.md"
+            "soul-shards/*/SOUL.md"
           ]
         }
       }

@@ -11,7 +11,12 @@ The agent working on a file cannot accidentally damage adjacent logic because ad
 ## Code
 
 - Files: ~80-100 lines, single concern. Not one component — one concern.
+- The threshold is a heuristic, not a law. Some concerns need 120-180 lines. Size is the
+  smell detector; concern count is the actual rule. A 130-line file with one concern is fine.
+  A 90-line file with two concerns needs sharding.
 - Assembly layer (App.tsx or equivalent): pure wiring only. No logic. No ternaries. No state beyond top-level selection. If it has a ternary, that ternary belongs in a block.
+- When the assembly layer outgrows itself (~200+ lines): shard into section sub-assemblies.
+  App.tsx imports sections, each section imports blocks. Two-tier wiring.
 - Contract on every file — first 3 lines:
   ```
   // Input: what this block receives
@@ -20,6 +25,8 @@ The agent working on a file cannot accidentally damage adjacent logic because ad
   ```
 - When something breaks: identify the single file, rewrite only that file, everything else frozen.
 - Versioning: block.v2.ext alongside original, swap reference when verified.
+- Garbage collection: once v2 is stable, delete v1 in a dedicated commit.
+- Orphan detection: before declaring done, check for version files with no live import.
 
 ## Scripts
 
@@ -42,3 +49,4 @@ The agent working on a file cannot accidentally damage adjacent logic because ad
 - Soul behavior sharded into soul-shards/[NN-name]/SOUL.md — loaded in numbered order at startup.
 - When updating a shard: only that shard file is in context. Adjacent shards are structurally unreachable.
 - Numbered prefixes enforce load order. 00- loads before 01-, security before persona.
+- Soul shard taxonomy is a starter set (00-03), not a mandatory full tree. Create shards as concerns arise.

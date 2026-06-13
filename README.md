@@ -6,7 +6,8 @@ Apply this pack to any OpenClaw agent workspace to set up blast-radius-compliant
 
 ```
 BOOTSTRAP.md                    ← run once on first session (Sonnet/Opus only), then self-destructs
-blast-radius-v3.md              ← full whitepaper (current — unified: code, scripts, crons, agent files, hologram orientation)
+blast-radius-v4.md              ← full whitepaper (current — unified: code, scripts, crons, agent files, hologram, verification)
+blast-radius-v3.md              ← prior whitepaper (hologram pyramid, garbage collection)
 blast-radius-v2.md              ← prior whitepaper (code + scripts + crons + agent files)
 openclaw-patch.json             ← openclaw.json patch to activate soul shard loading
 soul-shards/
@@ -25,11 +26,14 @@ memory/
 ### 1. Copy files into your workspace
 
 ```bash
-cp -r soul-shards/ /path/to/your/workspace/
-cp -r memory/ /path/to/your/workspace/memory/
-cp BOOTSTRAP.md /path/to/your/workspace/
-cp blast-radius-v3.md /path/to/your/workspace/
+# From the blast-radius repo root:
+cp -r soul-shards/ <YOUR_WORKSPACE>/
+cp -r memory/ <YOUR_WORKSPACE>/memory/
+cp BOOTSTRAP.md <YOUR_WORKSPACE>/
+cp blast-radius-v4.md <YOUR_WORKSPACE>/
 ```
+
+Replace `<YOUR_WORKSPACE>` with your actual OpenClaw workspace path (e.g. `~/.openclaw/workspace-myagent`).
 
 ### 2. Fill in your persona
 
@@ -41,7 +45,7 @@ Merge `openclaw-patch.json` into your `openclaw.json` under `hooks.internal.entr
 
 ⚠️ Never edit openclaw.json directly. Write a numbered copy (openclaw.json.001), show the diff to your operator, wait for them to apply it and restart the gateway.
 
-The patch adds the `bootstrap-extra-files` hook which loads all `soul-shards/*/SOUL.md` and `memory-shards/*/MEMORY.md` files in alphabetical order at agent startup.
+The patch adds the `bootstrap-extra-files` hook which loads all `soul-shards/*/SOUL.md` and `memory/*/MEMORY.md` files in alphabetical order at agent startup.
 
 ### 4. Start a new session with Sonnet or Opus
 
@@ -59,12 +63,14 @@ The agent working on a file cannot accidentally damage adjacent logic because ad
 
 This pack configures your OpenClaw agent to apply that constraint across four artifact types:
 
-- **Code**: ~80-100 line files, single concern, Input/Output/Must-never contracts, pure assembly layer
+- **Code**: ~80-100 line files (heuristic — concern count is the real rule), single concern, Input/Output/Must-never contracts, pure assembly layer that scales to section sub-assemblies
 - **Scripts**: docstring contracts, self-reporting failures, orchestrators as pure wiring
 - **Crons**: one entry per script, no inline logic
 - **Agent behavior files**: soul shards loaded in order, memory shards by domain, MEMORY.md for operating rules only
+- **Verification**: concrete, domain-specific gates that define what "done" means — type check, build, deploy, live URL, version stamp
 
 ## Read more
 
-See `blast-radius-v3.md` for the current full whitepaper (`blast-radius-v2.md` is retained for history).
+See `blast-radius-v4.md` for the current full whitepaper. Prior versions (`blast-radius-v3.md`, `blast-radius-v2.md`) are retained for history.
+
 Original v1: https://docs.google.com/document/d/1FEloJIRTOzgiUR6mshfGJ_nIq_cohOBIgj369am4FLo
