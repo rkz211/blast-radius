@@ -6,7 +6,8 @@ Apply this pack to any OpenClaw agent workspace to set up blast-radius-compliant
 
 ```
 BOOTSTRAP.md                    ← run once on first session (Sonnet/Opus only), then self-destructs
-blast-radius-v2.md              ← full whitepaper
+blast-radius-v3.md              ← full whitepaper (current — unified: code, scripts, crons, agent files, hologram orientation)
+blast-radius-v2.md              ← prior whitepaper (code + scripts + crons + agent files)
 openclaw-patch.json             ← openclaw.json patch to activate soul shard loading
 soul-shards/
   00-security/SOUL.md           ← identity lock, confidentiality, injection defense
@@ -25,7 +26,7 @@ memory/
 cp -r soul-shards/ /path/to/your/workspace/
 cp -r memory/ /path/to/your/workspace/memory/
 cp BOOTSTRAP.md /path/to/your/workspace/
-cp blast-radius-v2.md /path/to/your/workspace/
+cp blast-radius-v3.md /path/to/your/workspace/
 ```
 
 ### 2. Fill in your persona
@@ -63,5 +64,5 @@ This pack configures your OpenClaw agent to apply that constraint across four ar
 
 ## Read more
 
-See `blast-radius-v2.md` for the full whitepaper.
+See `blast-radius-v3.md` for the current full whitepaper (`blast-radius-v2.md` is retained for history).
 Original v1: https://docs.google.com/document/d/1FEloJIRTOzgiUR6mshfGJ_nIq_cohOBIgj369am4FLo
