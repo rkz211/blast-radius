@@ -215,11 +215,12 @@ Agent behavior files can be sharded using a bootstrap loader that globs a direct
 ```json
 "bootstrap-extra-files": {
   "paths": [
-    "soul-shards/*/SOUL.md",
-    "memory-shards/*/MEMORY.md"
+    "soul-shards/*/SOUL.md"
   ]
 }
 ```
+
+Memory files (`memory/*.md`) do not need explicit bootstrap loading — they are accessed natively through the platform's memory tools (`memory_search`, `memory_get`). Only soul shards need the bootstrap hook because they must be injected into the agent's context at startup in a specific order.
 
 The agent never sees one large `SOUL.md` — it sees several small ones loaded in sequence. Sharding is enforced at the platform level, not by convention.
 

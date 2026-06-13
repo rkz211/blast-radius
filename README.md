@@ -45,7 +45,7 @@ Merge `openclaw-patch.json` into your `openclaw.json` under `hooks.internal.entr
 
 ⚠️ Never edit openclaw.json directly. Write a numbered copy (openclaw.json.001), show the diff to your operator, wait for them to apply it and restart the gateway.
 
-The patch adds the `bootstrap-extra-files` hook which loads all `soul-shards/*/SOUL.md` and `memory/*/MEMORY.md` files in alphabetical order at agent startup.
+The patch adds the `bootstrap-extra-files` hook which loads all `soul-shards/*/SOUL.md` files in alphabetical order at agent startup. Memory files (`memory/*.md`) are accessed natively by OpenClaw via `memory_search` and `memory_get` — they do not need bootstrap loading.
 
 ### 4. Start a new session with Sonnet or Opus
 
