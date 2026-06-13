@@ -60,6 +60,17 @@ without verifying output. **Verify against the deployed state, not the local sta
 2. **Load order gate** — numbered prefixes intact and in correct sequence.
 3. **Contract gate** — shard's first three lines are present and accurate for current content.
 
+## Orientation Gate (.desc files)
+
+If the project uses the Hologram Pyramid:
+1. Every created or modified block has a corresponding `.desc` file.
+2. BLOCK line accurately reflects current contract.
+3. WIRING line reflects current callers/callees — if a caller was added or removed, the
+   callee's `.desc` is updated.
+4. New sections have a `section.desc` with APP + SECTION layers.
+
+Agents will skip `.desc` maintenance unless it is part of the gate. This is that gate.
+
 ## Orphan Detection Gate — All Domains
 
 Before declaring any task done, regardless of domain:

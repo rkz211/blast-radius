@@ -4,6 +4,7 @@
 **v2:** May 2026 — Code, Scripts, Crons, Agent Files
 **v3:** June 2026 — Unified: Hologram Pyramid, garbage collection, sharding/coupling tradeoff
 **v4:** June 2026 — Verification methods, assembly scaling, threshold honesty, orphan detection
+**v4.1:** June 2026 — WIRING layer in .desc files, tool-use tradeoff acknowledgment, .desc maintenance gate
 
 ---
 
@@ -30,6 +31,7 @@ That is the entire protocol. Everything below is how to apply it to each artifac
 - **v2** extended the same principle to the rest of the **agentic package** — the artifacts an autonomous agent actually produces and runs: **scripts, crons, and the agent's own behavior files**. This is what makes the protocol a complete operating discipline for an agent rather than a coding-only philosophy.
 - **v3** unified both and added three things the earlier versions lacked: the **Hologram Pyramid** orientation layer (so every fragment carries a map of the whole), explicit **garbage collection** of dead versions, and an honest treatment of the **sharding/coupling tradeoff**.
 - **v4** addresses what v3 left implicit. **Verification methods** — concrete, domain-specific gates that define what "done" actually means instead of just saying "verify." **Assembly layer scaling** — what to do when the wiring layer itself outgrows a single file. **Threshold honesty** — acknowledging that the 80-100 line target is a smell detector, not a law. **Orphan detection** — a gate that catches dead version files before they accumulate. These changes come from operating under v3 in production and finding where the protocol flexed without admitting it.
+- **v4.1** adds the **WIRING layer** to `.desc` files — dependency edges (who calls this block, what it calls) tracked independently from code, so adding a new caller never touches the called file. Acknowledges the **tool-use tradeoff** of heavy sharding (more files = more tool calls = more tokens) and positions the Hologram Pyramid as the mitigation. Adds a **`.desc` maintenance gate** to the verification checklist so orientation files don't drift from reality.
 
 ---
 
@@ -309,18 +311,39 @@ APP: Multi-agent companion app with persistent memory and real-time state sync
 SECTION: auth — handles authentication gate, session lifecycle, and identity state
 FEATURE: auth/gate — determines whether user is authenticated and routes accordingly
 BLOCK: receives auth store state; outputs boolean isAuthenticated + current user object; must never fetch tokens directly or call sign-in methods
+WIRING: called by App.tsx; calls nothing
 ```
+
+The five layers serve two purposes. The first four (APP, SECTION, FEATURE, BLOCK) orient the reader — where am I in the system? The fifth (WIRING) orients the editor — what depends on me, and what do I depend on?
+
+The WIRING layer tracks dependency edges: who calls this block and what it calls. This information changes when callers are added or removed — which is a different lifecycle than when the block's logic changes. Keeping WIRING in the `.desc` file means adding a new caller to a script never touches the script file. It also means you can grep `WIRING:` across all `.desc` files and reconstruct the full dependency graph of the system without any tooling.
+
+For scripts and crons, WIRING is especially valuable:
+
+```
+APP: Agent QC suite — operational quality checks
+SECTION: qc — quality checks and cost audits
+FEATURE: qc/cost — per-user token cost tracking
+BLOCK: reads session logs; outputs cost breakdown to stdout; must never modify files or send messages
+WIRING: called by session-end.sh, cron agent-nightly-qc; calls nothing
+```
+
+When an orchestrator is retired or a cron schedule changes, you update the `.desc` files of the affected blocks. The blocks themselves stay frozen.
 
 The feature identifier (`auth/gate`) is a stable slug. Grep it across the system and you immediately see every block that participates in that feature — across code, scripts, or shards. That makes feature-scoped context retrieval fast: paste only the blocks relevant to the current task.
 
 Rules for maintaining `.desc` files:
 - Update descriptions by editing the `.desc` file only — never edit the code file for a description change
 - Feature identifiers are stable slugs — do not rename them once assigned
-- Section `.desc` files hold APP + SECTION only; block `.desc` files hold FEATURE + BLOCK only
+- Section `.desc` files hold APP + SECTION only; block `.desc` files hold FEATURE + BLOCK + WIRING only
 - Every new block gets a `.desc` file before its first commit
 - When a block is versioned (`v2`), create a matching `v2.desc` alongside it
+- When a caller is added or removed, update the WIRING line in the callee's `.desc` file
+- WIRING format: `called by <comma-separated callers>; calls <comma-separated callees>` — use `calls nothing` or `called by nothing` when one side is empty
 
-**Honest status:** The Hologram Pyramid is the newest addition to the protocol and the least battle-tested. The concept is sound — cold session recovery from `.desc` files is measurably faster than re-reading source. But the discipline of maintaining `.desc` files alongside code has not been validated at scale across multiple projects. Adopt the structure; expect to refine the maintenance rules as real usage reveals friction points.
+**The tool-use tradeoff.** Heavy sharding produces many small files. An agent working in a heavily-sharded system makes more tool calls (`read_file`, `grep`, `list_directory`) to understand the landscape than one working in a few large files. This is a real cost in tokens and latency. The Hologram Pyramid is the mitigation: `.desc` files give the agent a compressed map of the system without reading every source file. Cold session recovery from `.desc` files is cheaper than tracing source. The tradeoff is worth it — contained blast radius and fast orientation outweigh the extra tool calls — but it is a tradeoff, not a free lunch.
+
+**Honest status:** The Hologram Pyramid is a newer addition to the protocol and less battle-tested than Parts I-IV. The concept is sound — cold session recovery from `.desc` files is measurably faster than re-reading source. But the discipline of maintaining `.desc` files alongside code has not been validated at scale across multiple projects. The WIRING layer is the newest extension. Adopt the structure; expect to refine the maintenance rules as real usage reveals friction points.
 
 Parts I-IV address blast radius on writes. Part V addresses context reconstruction on reads. Together they mean cold session recovery becomes a single message: paste the assembly layer, paste the `.desc` files for the relevant blocks, and the model has everything. No re-explanation. No warm-up tax.
 
@@ -360,6 +383,16 @@ The earlier parts reference verification repeatedly ("verify before swap," "conf
 2. **Load order gate** — numbered prefixes are intact and in correct sequence. No gaps that change ordering semantics (01, 02, 04 is fine; 01, 03, 02 is not).
 3. **Contract gate** — the shard's first three lines (Input / Output / Must never) are present and accurate for its current content.
 
+### Orientation Gate (`.desc` files)
+
+If the project uses the Hologram Pyramid:
+1. Every block that was created or modified has a corresponding `.desc` file.
+2. The BLOCK line in each `.desc` accurately reflects the current contract (Input/Output/Must never).
+3. The WIRING line reflects the current callers and callees — if a caller was added or removed during this task, the callee's `.desc` is updated.
+4. If a new section was created, a `section.desc` file exists with APP + SECTION layers.
+
+Agents will skip `.desc` maintenance unless it is part of the gate. This is that gate.
+
 ### Orphan Detection Gate
 
 Before declaring any task done — regardless of domain — check for orphaned version files:
@@ -380,14 +413,14 @@ If you cannot define the verification method for an artifact before you build it
 
 | Domain | Assembly Layer | Blocks | Contract | Orientation | Verification |
 |---|---|---|---|---|---|
-| Code | `App.tsx` — pure imports + JSX (scales to section sub-assemblies) | ~80-100 line single-concern files (heuristic, not law) | First 3 lines: Input / Output / Must never | `.desc` file per block | Type → Build → Deploy → Live URL → Version stamp |
-| Scripts | Orchestrator — pure delegation | ~80-150 line single-concern scripts | Docstring: reads / writes / must never | `.desc` or docstring header | Run → Output match → Negative check → Exit code |
-| Crons | Cron entry — one script call | Script with all logic inside | Docstring on the script | `.desc` on the script | Structure → Script gate → Schedule parse |
+| Code | `App.tsx` — pure imports + JSX (scales to section sub-assemblies) | ~80-100 line single-concern files (heuristic, not law) | First 3 lines: Input / Output / Must never | `.desc` file: APP/SECTION/FEATURE/BLOCK/WIRING | Type → Build → Deploy → Live URL → Version stamp |
+| Scripts | Orchestrator — pure delegation | ~80-150 line single-concern scripts | Docstring: reads / writes / must never | `.desc` file: BLOCK/WIRING (who calls, what called) | Run → Output match → Negative check → Exit code |
+| Crons | Cron entry — one script call | Script with all logic inside | Docstring on the script | `.desc` on the script: WIRING to cron entry | Structure → Script gate → Schedule parse |
 | Agent files | Bootstrap loader (soul-shards glob) | Soul shards + memory shards | First 3 lines of each shard | Shard header carries APP/SECTION | Isolation → Load order → Contract accuracy |
 
 Same principle. Same mechanism. Different file type. Every domain now has a concrete definition of "done."
 
-The agent working on any one block cannot touch what is not in the file. Every block carries a map of the whole. Dead versions are swept before the task closes. Completion is verified against the live environment, not the local one. That is the entire protocol.
+The agent working on any one block cannot touch what is not in the file. Every block carries a map of the whole — including who calls it and what it calls. Dead versions are swept before the task closes. Completion is verified against the live environment, not the local one. That is the entire protocol.
 
 ---
 
