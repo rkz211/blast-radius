@@ -70,6 +70,16 @@ Each file: ~80-100 lines, single concern. Not "one component" — one concern. A
 
 When a file is long but single-concern, leave it alone. When a file is 90 lines but does two things, shard it. The protocol targets concern isolation, and line count is the early warning system, not the constraint.
 
+**When the protocol hurts.** The protocol improves AI-assisted maintenance on complex, multi-concern codebases. It is not always the right tool. Here is where it tends to make things worse:
+
+- **Small greenfield projects** — a 200-line prototype does not need five single-concern modules. The overhead of sharding (file naming, contracts, `.desc` files, wiring layer discipline) exceeds its value until the codebase reaches complexity where regressions actually occur.
+- **Heavy churn phases** — when the domain model is still changing rapidly (early product, frequent pivots), sharding too early locks you into a structure that may need to be re-sharded when the design settles. The protocol earns its keep on systems that are stable enough to maintain.
+- **Solo fast iteration** — if you are the only person working in the codebase, moving fast, and comfortable holding the full system in your head, the protocol's orientation overhead (`.desc` files, WIRING lines) may slow you down more than regressions cost you. It is optimized for the case where cold context reconstruction is expensive — either for an AI agent or a new contributor.
+- **When file count becomes navigation fatigue** — a system with 200 single-concern files and thorough `.desc` coverage works well for grep-based context retrieval. Without the `.desc` discipline, 200 files is just a maze. If your team will not maintain `.desc` files, heavy sharding trades "big file" problems for "can't find anything" problems. Do not adopt the file structure without the orientation layer.
+- **When the refactor itself is the churn** — sharding a live system that is actively being developed by multiple contributors requires buy-in. If half the team shards and half doesn't, the result is inconsistent structure that is harder to reason about than either approach applied uniformly.
+
+The honest question before adopting: *Does your team actually experience AI regression loops and cold context costs?* If the answer is no, the protocol is probably overhead. If the answer is yes — especially after 3+ months of AI-assisted maintenance on a real product — the structure pays for itself.
+
 **When not to shard.** Some artifacts are single-concern but inherently long, and splitting them would create coupling problems worse than the large file:
 
 - **Parsers and grammars** — a parser's rules need to be visible together. Splitting a 300-line grammar across files forces the agent to hold multiple files in context to understand one concern.
@@ -79,6 +89,8 @@ When a file is long but single-concern, leave it alone. When a file is 90 lines 
 - **Configuration and schema files** — a JSON schema, a database migration, a Terraform resource block. These are declarations, not logic, and their structure is dictated by the tool that reads them.
 
 The rule is not "break up every long file." The rule is "every file should have one concern." When a file is long because its concern is inherently complex, the correct response is to leave it alone and put a contract at the top.
+
+**Contracts rot without enforcement.** The three-line contract (Input / Output / Must never) is only useful if it stays accurate. A contract that was written at creation and never updated is worse than no contract — it actively misleads the agent reading the file. The protocol acknowledges this for `.desc` files (the Orientation Gate in Part VI is specifically designed to force `.desc` maintenance). The same risk applies to every contract. The mitigation is the same: make contract accuracy part of the verification gate. Before declaring any task done, check that the contracts on any modified file still accurately describe the current behavior. An agent that updated a block's logic but not its contract has introduced a silent lie. The optional check script in Part VII can detect missing contracts; correctness requires the gate.
 
 **The assembly layer is sacred**
 `App.tsx` (or equivalent root) is pure wiring — imports and JSX composition only. Zero logic. Zero state management beyond top-level selection. If a ternary appears in the assembly layer, treat it as a smell signal: conditional logic is creeping into the wiring. The concern that ternary represents — a display toggle, a feature gate, a layout switch — belongs in a block, not in the assembly layer.

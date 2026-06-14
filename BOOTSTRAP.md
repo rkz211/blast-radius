@@ -3,15 +3,24 @@
 This file runs on first session. It sets up the workspace for blast-radius-compliant development:
 sharded soul files, sharded memory files, and the protocol reference doc.
 
-## Step 0 — Model Gate
+## Step 0 — Capability Gate
 
-Check the current model via `session_status`.
+This bootstrap requires a model capable of multi-step reasoning, file inspection, safe editing, and self-recovery from failures. Model family names age badly — use this capability checklist instead:
 
-**If the model is NOT Sonnet or Opus class** (i.e. it is Haiku, a fast/non-reasoning variant, or any non-frontier model): skip all steps below, delete this file, and reply:
+**Required capabilities:**
+- Can inspect and read multiple files in sequence without losing context
+- Can make targeted edits without rewriting adjacent logic
+- Can reason over diffs and identify regressions
+- Can run a verification gate (type check, build, deploy check) and interpret the results
+- Can recover from a failure: read the error, identify the block, rewrite only that block
 
-> "Bootstrap requires Sonnet or Opus. Current model is [model]. Switch models and start a new session to run setup."
+**If you are uncertain whether the current model meets this bar:** run `session_status`, check the model name, and use your judgment. As of June 2026, Sonnet and Opus class models (and equivalents from other providers at that capability tier) reliably meet it. Fast/mini/nano variants typically do not. When in doubt, use the strongest model available for bootstrap — you can run lighter models for routine tasks afterward.
 
-**If the model IS Sonnet or Opus**: proceed.
+**If the model does not meet the capability bar**: skip all steps below, delete this file, and reply:
+
+> "Bootstrap requires a capable reasoning model. Current model [model] may not meet the bar. Switch to a frontier-tier model and start a new session to run setup."
+
+**If the model meets the capability bar**: proceed.
 
 ---
 
