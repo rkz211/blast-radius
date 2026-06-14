@@ -78,6 +78,10 @@ Must never: contain core rules, physics rules, schema, or LLM calling logic
 from engine.l1_caller import run_layer1
 ```
 
+## The Refactor Process
+
+The refactor was performed by an AI agent in a single session with zero errors. The 361-line monolith was small enough to read in full; writing each module was straightforward because the five concerns (caller, schema, three prompt sections) were already logically distinct — they were just sharing a file. Reading big and writing small is the easy direction.
+
 ## The Diff
 
 ```

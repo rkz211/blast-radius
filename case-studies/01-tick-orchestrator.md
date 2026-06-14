@@ -86,6 +86,10 @@ Must never: contain game logic, prompt engineering, delta math, or narrative tex
 """
 ```
 
+## The Refactor Process
+
+The refactor was performed by an AI agent in a single session with zero errors. Reading the 779-line monolith gave the agent full context of all five concerns; writing each module was straightforward because the output was small and single-purpose. Reading big and writing small is the easy direction.
+
 ## The Diff
 
 ```

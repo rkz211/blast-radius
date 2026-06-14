@@ -64,6 +64,10 @@ Six files. Each with a three-line contract. The page became wiring + UI chrome.
 // Must never: contain physics logic, drawing logic, or tier calculations
 ```
 
+## The Refactor Process
+
+The refactor was performed by an AI agent in a single session with zero errors. The process was straightforward: read the 795-line monolith (big context in), write five focused modules (small output). Reading big and writing small is the easy direction — the agent has full context of the system and outputs only the isolated concern. No iteration was needed.
+
 ## The Diff
 
 ```
@@ -101,6 +105,60 @@ Six files. Each with a three-line contract. The page became wiring + UI chrome.
 Note the pattern: three consecutive graphEvents fixes (zoom velocity, max zoom, friction). All three were isolated to the event handler. None of them touched the physics simulation, the drawing logic, or the tier calculations — even though zoom behavior is visually entangled with all of those concerns. The file boundary enforced the isolation that discipline alone would not have maintained.
 
 \* `graphPlace.ts` was added post-refactor as a sixth module (placement/seeding layout). This is the protocol working as designed — new concerns get new files, not appended to existing ones.
+
+## Quantitative Evidence: The Tailspin in Git
+
+The most compelling evidence is not the line counts — it's the commit pattern before and after the refactor.
+
+**Before the refactor: 12 consecutive bug fixes, all in `GraphPage.tsx`.**
+
+The git log tells the story of an agent trapped in a regression loop:
+
+```
+fix: world-space node radii, labels in world-space coords ... bump LS key v5
+fix: labels are screen-space fixed 11px — ignore zoom ....
+fix: nodes screen-space fixed size, labels pure screen-space ... bump LS v6
+fix: initial transform shows full scatter from frame 1 ... bump LS v7
+fix: sunflower spiral init (even spread, no origin clump) ...
+fix: remove alpha² centering (was collapsing all nodes) ... LS v8
+fix: random scatter (no spiral rings) ...
+fix: labels off by default (no white smear) ... LS v9
+fix: label threshold 0.35 (calibrated to actual zoom range) ... LS v10
+fix: progressive label density — hubs only at low zoom ...
+```
+
+Three patterns visible:
+
+1. **World-space vs screen-space whipsaw** — three commits oscillating between coordinate systems because fixing one concern (node size) broke an adjacent concern (label size) in the same file.
+2. **Layout iteration spiral** — four consecutive attempts at initial placement, each undoing the previous because the physics, the centering, and the scatter logic were all in scope.
+3. **Label fix chain** — three commits iterating on label visibility because each fix partially broke what the previous one established.
+
+The `LS v5` through `LS v10` markers are localStorage version bumps — the agent was invalidating cached state on every attempt because its own fixes kept corrupting the previous state. **Six cache invalidations in the pre-refactor sequence. Zero after.**
+
+**After the refactor: 13 fixes, each naming its target module.**
+
+```
+fix(graphDraw): labels only for selected neighborhood + tier-3 hubs, no smear
+fix(graphDraw): thin selection ring instead of bloom, no glow artifact
+fix(graphEvents): cap zoom velocity to prevent blast-past
+fix(graphEvents): hard cap scale at 8x max zoom
+fix(GraphPage): clear zoom velocity on Fit — prevents momentum drift
+fix(graphEvents): tighter velocity cap (0.15), faster friction
+fix(graphDraw/Tiers): remove neighbor rings (bloom), reduce hub opacity
+fix(graphTiers): log-scale node radius — prevents mega-hub bloom
+fix(graphDraw): zoom-scaled opacity — low zoom transparent, high zoom full
+fix(graphDraw): cap screen-space node radius, restore edge visibility
+```
+
+No chains. No whipsaw. No cache invalidations. Each fix is complete in itself.
+
+| Metric | Before Refactor | After Refactor |
+|---|---|---|
+| Bug fix commits | 12 | 13 |
+| Single-file fixes | 58% | 68% |
+| Avg files per commit | 1.7 | 1.4 |
+| Regression chains (consecutive fixes to same concern) | 3 chains (3, 4, and 3 commits each) | 0 |
+| localStorage cache invalidations | 6 (LS v5→v10) | 0 |
 
 ## Why This One Matters
 

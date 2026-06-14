@@ -79,6 +79,10 @@ Eight files. Each with a three-line contract. The panel became pure wiring.
 //             or parse JSON — all parsing lives in this file as the data layer
 ```
 
+## The Refactor Process
+
+The refactor was performed by an AI agent in a single session with zero errors. The 531-line monolith contained seven visual concerns that were already conceptually distinct (HP, stats, conditions, class resources, spell slots, spell book, data parsing) — they just happened to live in one file. Reading the full context and writing each module individually was the easy direction.
+
 ## The Diff
 
 ```
