@@ -47,6 +47,20 @@ You hand a large file to an LLM, ask it to fix one thing, and it rewrites adjace
 
 Large files have large blast radii. When the regression surface is 400 lines, any change risks 400 lines.
 
+### Where the Wall Is
+
+In production use, the breakdown point is around **~700 lines**. Below that, agents cope — they make mistakes, but the mistakes are containable and the fixes land. Above ~700 lines, the tailspin starts: fixes create regressions, regressions create fixes, and the agent that built the system begins dismantling it.
+
+The protocol eliminates this wall entirely. After sharding a codebase to single-concern files, we have not hit a new complexity ceiling. As systems grow, you add more files and more layers of assembly (section sub-assemblies, orchestrator hierarchies), and the agent's effective blast radius stays constant — one file, one concern, regardless of total system size.
+
+### Why the Refactor Itself Is Easy
+
+A common concern: "If the agent can't handle large files, how does it handle the refactor?" The answer is that reading big and writing small is the easy direction. The agent reads the full monolith — 500, 700, 800 lines — and has complete context of every concern. Then it writes each module individually: 80-100 lines, one concern, with a contract. The input is large; the output is small. That's the direction LLMs are good at.
+
+The hard direction is the one that created the problem: writing *into* a large file. Adding a fix to a 700-line file means the agent must hold all 700 lines in its regression surface while producing output that doesn't damage any of them. That's where it breaks down.
+
+In practice, all four case studies in this repository were refactored by an AI agent in a single session each, with zero errors. The refactor is not the hard part. Maintaining the monolith is the hard part. The protocol replaces the hard part with structure.
+
 ### The Rules
 
 **Shard below the human-readable threshold**
