@@ -49,6 +49,8 @@ You don't need this if:
 - Your codebase is small enough that the agent can hold it all in context without drifting
 - You want human-in-the-middle review on every change — this protocol is optimized to minimize that, not support it
 
+**Already have a codebase?** See [`MIGRATION.md`](MIGRATION.md) for how to apply the protocol incrementally without a full rewrite.
+
 ---
 
 ## What It Does
@@ -87,6 +89,7 @@ The Claude Code and Cursor versions carry the protocol's actual contributions �
 ### What's in here
 
 ```
+MIGRATION.md                    ← how to apply the protocol to an existing codebase
 blast-radius-v4.3.md            ← full whitepaper (current v4.3)
 blast-radius-v4.md              ← prior version (retained for history)
 blast-radius-v3.md              ← prior version (retained for history)
