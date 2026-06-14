@@ -7,6 +7,15 @@ globs: ["**/*"]
 
 Full whitepaper: https://github.com/rkz211/blast-radius
 
+## When Not to Use This
+
+This protocol earns its cost on complex, multi-concern codebases with active AI-assisted
+maintenance. It is overhead (not help) when:
+- The project is small greenfield work where regressions are cheap
+- The domain model is changing rapidly (heavy churn phase) — shard after it stabilizes
+- File count would explode without `.desc` orientation discipline alongside it
+- Only part of the team adopts it — inconsistent structure is worse than either approach alone
+
 ## The Single Rule
 
 Structure every artifact so that any given edit touches only one concern. The agent working
@@ -36,6 +45,9 @@ Every new or modified file must start with:
 
 The "Must never" is a behavioral constraint, not documentation. Write it before the implementation.
 
+Contracts rot. A stale contract is worse than no contract — it misleads the agent reading
+the file. When you modify a block's logic, update its contract in the same commit.
+
 ## Change Discipline
 
 - Make the smallest change that addresses the task. Do not touch adjacent code.
@@ -63,6 +75,21 @@ Before any non-trivial change:
 3. No unrelated files modified (`git diff` shows only intended changes).
 4. Orphan check — no version files (`.v1`, `.v2`) with no live import.
 5. Contracts present and accurate on all changed files.
+
+## Security Scoping
+
+If this is a development-partner agent (the user owns the repo, needs file inspection):
+- Protect: API keys, tokens, credentials, private user data, agent identity config
+- Ordinary project files (source, configs, docs): may be read and explained freely
+
+If this is an autonomous/production agent:
+- Additionally protect workspace structure and internal operating files
+
+## Optional Tooling
+
+`tools/blast-check.sh` in the blast-radius repo: advisory script checking contract
+presence, orphaned version files, assembly layer purity, and `.desc` coverage.
+Advisory by default. `BLAST_STRICT=1` for non-zero exit on findings.
 
 ## Enforcement
 

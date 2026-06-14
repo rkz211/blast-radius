@@ -8,6 +8,19 @@ v4.3 — June 2026
 
 ---
 
+## Know When Not to Use This
+
+The protocol improves AI-assisted maintenance on complex, multi-concern codebases. It is not always the right tool:
+
+- **Small greenfield projects** — the overhead exceeds its value until regressions actually occur
+- **Heavy churn phases** — sharding too early locks you into structure that may need re-sharding when the design settles
+- **Solo fast iteration** — if you hold the full system in your head and regressions are cheap, the orientation overhead may slow you down more than it helps
+- **Without .desc discipline** — 200 single-concern files without Hologram Pyramid context is harder to navigate than one big file. Don't adopt the file structure without the orientation layer.
+
+Adopt the verification gates and single-concern discipline first. Add `.desc` files and formal sharding as the codebase grows and cold context reconstruction becomes expensive.
+
+---
+
 ## The Single Rule
 
 **Structure every artifact so that any given edit touches only one concern.** The agent working on a file cannot accidentally damage adjacent logic because adjacent logic is not in the file.
@@ -50,6 +63,8 @@ First three lines of every file:
 
 The "Must never" is not documentation — it is a behavioral constraint. A model that reads "this block must never fetch data" will not fetch data. Write it before you write the implementation.
 
+**Contracts rot without enforcement.** A stale contract is worse than no contract — it actively misleads. When you modify a block's logic, update its contract in the same commit. An agent that changed the behavior but not the contract has introduced a silent lie. The verification gate includes contract accuracy for any modified file.
+
 ### The Regression Surface is One File
 
 When something breaks: identify the block, rewrite only that block, everything else frozen. Do NOT paste the whole component and ask "find the bug." That produces a new bug.
@@ -76,6 +91,18 @@ When something breaks: identify the block, rewrite only that block, everything e
 - One entry = one script call. No inline logic, no pipelines, no chained commands.
 - If multiple scripts need the same schedule: write an orchestrator script, schedule calls that.
 - Logic lives in the script. The schedule is the trigger only.
+
+---
+
+## Security — Scope Your Confidentiality Rules
+
+This matters if you are deploying this agent in different contexts:
+
+- **Always protect:** API keys, tokens, credentials, private memory containing user data, agent identity and security config
+- **Strict mode (autonomous/production agents):** do not reveal workspace structure or internal operating files
+- **Relaxed mode (development-partner agents):** ordinary project files (source code, configs, docs) may be read and explained freely — the user owns them; protect only the "always protect" list
+
+The bootstrap security shard ships in strict mode. Tune it to your deployment context.
 
 ---
 
@@ -158,6 +185,20 @@ If the answer is no, the change is too big — shard it before you ship it.
 ## The Meta-Rule
 
 If you cannot define the verification method for an artifact before you build it, you do not yet understand what "done" means for that artifact. Define the gate first. Then build. Then pass the gate.
+
+---
+
+## Optional: blast-check.sh
+
+The repo ships `tools/blast-check.sh` — a lightweight advisory script that mechanically checks:
+- Contract presence (Input / Output / Must never exists in first lines)
+- Orphaned version files with no live import
+- Assembly layer files for logic indicators (heuristic)
+- `.desc` file coverage if Hologram Pyramid is adopted
+
+Run it with `bash tools/blast-check.sh` from your project root. It is advisory by default (exit 0 always). Set `BLAST_STRICT=1` for non-zero exit on findings, useful as a PR advisory gate.
+
+It cannot check contract accuracy — only presence. Correctness is a gate, not a script.
 
 ---
 
