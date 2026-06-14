@@ -12,7 +12,7 @@
 
 ## The Single Idea
 
-A Sonnet or Opus agent with a good critical thinking loop can safely build production software — full-stack web applications, cloud infrastructure, backend engines, and autonomous agent systems — if every artifact is structured so that any given edit touches only one concern.
+In our experience: a Sonnet or Opus agent with a good critical thinking loop can safely build production software — full-stack web applications, cloud infrastructure, backend engines, and autonomous agent systems — if every artifact is structured so that any given edit touches only one concern. This is the result we have observed consistently across our own systems. It has not yet been independently validated beyond our work, and the case studies in this repository are from private projects by the same authors. We present this as documented field experience, not as a proven universal claim.
 
 The protocol makes that structure explicit. It applies the same principle to four artifact types:
 
