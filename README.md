@@ -18,6 +18,24 @@ The agent didn't get smarter. The structure got smaller. That's the entire proto
 
 ---
 
+## The Operating Model This Is Built For
+
+This protocol is designed for a specific way of working: **the human is the product owner, the agent is the developer and maintainer.** The human sets direction, makes decisions, and holds the vision. The agent builds, debugs, ships, and verifies — autonomously, without someone reviewing every line.
+
+That operating model breaks down at the 700-line wall. Once a file gets large enough, the agent can't fix one thing without breaking another. The regression tailspin starts. You're suddenly paying human-developer rates to babysit an agent that's dismantling what it built.
+
+**The onboarding cost question misses the point.** Critics ask: "Is the protocol overhead worth it?" That's the wrong comparison. The right comparison is:
+
+| Approach | Cost to onboard | Cost per regression | Who pays the maintenance bill? |
+|---|---|---|---|
+| No structure | Zero | Human debugging session | You, every time |
+| This protocol | One refactor session | Near zero | The agent, autonomously |
+| Human developer | Hiring + ramp-up | Human debugging session | Payroll |
+
+A human developer can maintain a 700-line monolith. Slowly. Expensively. That's not the goal here. The goal is an agent that can maintain it indefinitely at near-zero marginal cost — and the protocol is what removes the wall that makes that impossible.
+
+If you want AI as a "fast autocomplete for humans," you don't need this. If you want AI doing the actual development work while you stay at the product level, this is what keeps that working past the point where it would otherwise break.
+
 ## Who This Is For
 
 You need this if:
@@ -29,7 +47,7 @@ You need this if:
 You don't need this if:
 - You're building a weekend prototype you'll throw away
 - Your codebase is small enough that the agent can hold it all in context without drifting
-- You're happy with human-in-the-middle review on every change
+- You want human-in-the-middle review on every change — this protocol is optimized to minimize that, not support it
 
 ---
 
