@@ -32,9 +32,11 @@ That operating model breaks down at the 700-line wall. Once a file gets large en
 | This protocol | One refactor session | Near zero | The agent, autonomously |
 | Human developer | Hiring + ramp-up | Human debugging session | Payroll |
 
-A human developer can maintain a 700-line monolith. Slowly. Expensively. That's not the goal here. The goal is an agent that can maintain it indefinitely at near-zero marginal cost — and the protocol is what removes the wall that makes that impossible.
+A human developer can maintain a 700-line monolith. Slowly. Expensively. That's not the goal here. The goal is an agent that dramatically reduces the regression cost of maintenance — and the protocol is what removes the wall that makes that possible. In our experience, regression loops drop close to zero on sharded codebases. We don't claim that generalizes universally; we claim it has held consistently across our own systems.
 
 If you want AI as a "fast autocomplete for humans," you don't need this. If you want AI doing the actual development work while you stay at the product level, this is what keeps that working past the point where it would otherwise break.
+
+**One warning before you adopt:** the verification discipline is the core of this protocol, not the small files. Small files with stale contracts and no verification gate is file sprawl — it looks like the protocol and does not work like it. The structure limits the blast radius. The verification gate confirms it's actually zero. You need both. If you are only going to adopt part of this, adopt the verification gates and known-good checkpoints first — those pay off immediately regardless of file size.
 
 ## Who This Is For
 
