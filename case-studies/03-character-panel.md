@@ -1,8 +1,8 @@
 # Case Study 3: CharacterPanel.tsx — 531 → 160-line wiring + 7 modules
 
 **System:** Thornwood frontend — a React/TypeScript game interface for the D&D engine. The CharacterPanel renders a full character sheet: HP bar, ability scores, conditions, class-specific resources (spell slots, Ki points, rage charges), and a spell book.
-**Repo:** [`rkz211/rkz-thornwood`](https://github.com/rkz211/rkz-thornwood)
-**Commit:** [`c975869`](https://github.com/rkz211/rkz-thornwood/commit/c975869) — May 29, 2026
+**Repo:** Private production codebase (frontend for Case Studies 1-2)
+**Commit:** `c975869` — May 29, 2026
 
 ---
 

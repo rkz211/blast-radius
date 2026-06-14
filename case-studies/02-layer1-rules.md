@@ -1,8 +1,8 @@
 # Case Study 2: layer1_rules.py — 361 → 10-line shim + 5 modules
 
 **System:** Thornwood — D&D 5e physics engine. Layer 1 is the rules engine that translates player actions into mechanical deltas (HP changes, position updates, combat state transitions) by calling an LLM with structured prompts and parsing the response against a strict schema.
-**Repo:** [`rkz211/thornwood`](https://github.com/rkz211/thornwood)
-**Commit:** [`338a8c0`](https://github.com/rkz211/thornwood/commit/338a8c0) — May 29, 2026
+**Repo:** Private production codebase (same system as Case Study 1)
+**Commit:** `338a8c0` — May 29, 2026
 
 ---
 

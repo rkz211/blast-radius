@@ -1,8 +1,8 @@
 # Case Study 4: GraphPage.tsx — 795 → 120-line wiring + 5 modules
 
 **System:** A force-directed graph viewer rendering an Obsidian-style knowledge graph with tier-based node sizing, physics simulation, zoom/pan interaction, and canvas drawing. Built as part of a personal knowledge OS dashboard.
-**Repo:** [`rkz211/rkz-app12`](https://github.com/rkz211/rkz-app12)
-**Commit:** [`654044b`](https://github.com/rkz211/rkz-app12/commit/654044b) — May 31, 2026
+**Repo:** Private production codebase
+**Commit:** `654044b` — May 31, 2026
 
 ---
 

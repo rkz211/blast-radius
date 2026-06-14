@@ -12,10 +12,10 @@ Each case study includes:
 
 | # | Module | System | Before | After | Commit |
 |---|---|---|---|---|---|
-| 1 | [`tick_orchestrator.py`](01-tick-orchestrator.md) | D&D rules engine (Python) | 779 lines | 220-line wiring + 5 modules | [`2fdc7b0`](https://github.com/rkz211/thornwood/commit/2fdc7b0) |
-| 2 | [`layer1_rules.py`](02-layer1-rules.md) | D&D rules engine (Python) | 361 lines | 10-line shim + 5 modules | [`338a8c0`](https://github.com/rkz211/thornwood/commit/338a8c0) |
-| 3 | [`CharacterPanel.tsx`](03-character-panel.md) | D&D frontend (React/TS) | 531 lines | 160-line wiring + 7 modules | [`c975869`](https://github.com/rkz211/rkz-thornwood/commit/c975869) |
-| 4 | [`GraphPage.tsx`](04-graph-page.md) | Force-directed graph viewer (React/TS) | 795 lines | 120-line wiring + 5 modules | [`654044b`](https://github.com/rkz211/rkz-app12/commit/654044b) |
+| 1 | [`tick_orchestrator.py`](01-tick-orchestrator.md) | D&D rules engine (Python) | 779 lines | 220-line wiring + 5 modules | `2fdc7b0` (private repo) |
+| 2 | [`layer1_rules.py`](02-layer1-rules.md) | D&D rules engine (Python) | 361 lines | 10-line shim + 5 modules | `338a8c0` (private repo) |
+| 3 | [`CharacterPanel.tsx`](03-character-panel.md) | D&D frontend (React/TS) | 531 lines | 160-line wiring + 7 modules | `c975869` (private repo) |
+| 4 | [`GraphPage.tsx`](04-graph-page.md) | Force-directed graph viewer (React/TS) | 795 lines | 120-line wiring + 5 modules | `654044b` (private repo) |
 
 ## What to Look For
 

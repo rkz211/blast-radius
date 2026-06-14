@@ -1,8 +1,8 @@
 # Case Study 1: tick_orchestrator.py — 779 → 220 + 5 modules
 
 **System:** Thornwood — a procedural AI Dungeon Master with a true D&D 5e physics engine, persistent world state, and authored narration.
-**Repo:** [`rkz211/thornwood`](https://github.com/rkz211/thornwood)
-**Commit:** [`2fdc7b0`](https://github.com/rkz211/thornwood/commit/2fdc7b0) — May 29, 2026
+**Repo:** Private production codebase
+**Commit:** `2fdc7b0` — May 29, 2026
 
 ---
 
