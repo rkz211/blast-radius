@@ -91,7 +91,7 @@ blast-radius-v4.3.md            ← full whitepaper (current v4.3)
 blast-radius-v4.md              ← prior version (retained for history)
 blast-radius-v3.md              ← prior version (retained for history)
 blast-radius-v2.md              ← prior version (retained for history)
-case-studies/                   ← before/after evidence from real refactors
+case-studies/                   ← before/after evidence from real refactors (5 studies)
 openclaw-patch.json             ← openclaw.json patch to activate soul shard loading
 BOOTSTRAP.md                    ← run once on first session, then self-destructs
 soul-shards/
@@ -105,7 +105,16 @@ memory/
   blast-radius-verification.md  ← verification gates + troubleshooting/recovery discipline
 platforms/
   claude-code/CLAUDE.md         ← drop-in for Claude Code
-  cursor/.cursor/               ← drop-in rules + /verify command for Cursor
+  cursor/.cursor/
+    rules/blast-radius.mdc      ← core protocol rules (auto-loaded)
+    commands/verify.mdc         ← /verify slash command: full gate including type check, build, accuracy
+tools/
+  blast-check.sh                ← advisory script: mechanical checks only (contract presence,
+                                   orphan detection, assembly purity, .desc coverage)
+                                   Run: bash tools/blast-check.sh
+                                   /verify and blast-check.sh are complementary:
+                                   the script catches what a script can catch;
+                                   /verify covers what only a human or agent can judge
 ```
 
 ### How to apply (OpenClaw)
