@@ -74,6 +74,30 @@ Do not change any behavior. This is a structural refactor only.
 
 ---
 
+## The Bug-Fix Prompt Pattern
+
+The single most common operation during migration: the agent needs to fix a bug in a file that hasn't been migrated yet. Use this pattern to get the benefit of the protocol without a full refactor first.
+
+```
+Before touching anything:
+1. Read [filename] and identify which concern owns this bug.
+2. Write a three-line contract for that concern:
+   // Input: ...
+   // Output: ...
+   // Must never: ...
+3. Add the contract to the top of the file.
+4. Now fix only the behavior described by that contract.
+   Do not touch adjacent logic. Do not restructure the file.
+   The regression surface is the concern you just named — nothing else.
+5. After the fix: confirm git diff shows only [filename] changed.
+```
+
+This gives you the protocol's core benefit — named blast radius, frozen adjacent logic — without requiring a full shard first. The contract forces the agent to articulate the boundary before it starts editing. That one step eliminates most of the "fixed one thing, broke another" failures.
+
+Once a file has been through this pattern two or three times, it is usually obvious how it should be sharded — the concern boundaries reveal themselves through the contracts you've been writing.
+
+---
+
 ## Step 4 — Add Contracts to Files You Touch
 
 You do not need to add contracts to every file in the codebase immediately. Add them to files as you touch them:
