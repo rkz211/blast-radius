@@ -99,6 +99,18 @@ platforms/
 
 ---
 
+## Why This Is Public
+
+This protocol has not been validated by anyone but its authors. We built it because our agents were falling apart at scale, and this fixed it. We could have kept using it quietly.
+
+But if you're the developer who just watched your agent dismantle something it built yesterday — if you're searching for a solution to a problem you're not even sure has a name — we want to know if this helps. And if it does, we hope you'll share what you learn back.
+
+The case studies are real. The commit hashes are real. The results are from production systems we run. But this is one team's experience on one team's projects. The protocol needs other people building with it, breaking it, and telling us where it doesn't hold. That's why it's here.
+
+If you try it: [open an issue](https://github.com/rkz211/blast-radius/issues), start a discussion, or just tell us what happened. The protocol gets better when it fails in public, not when it succeeds in private.
+
+---
+
 ## Read More
 
 See `blast-radius-v4.3.md` for the current full whitepaper (v4.3). Prior versions are retained for history.
