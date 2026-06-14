@@ -71,6 +71,7 @@ blast-radius-v4.3.md            ← full whitepaper (current v4.3)
 blast-radius-v4.md              ← prior version (retained for history)
 blast-radius-v3.md              ← prior version (retained for history)
 blast-radius-v2.md              ← prior version (retained for history)
+case-studies/                   ← before/after evidence from real refactors
 openclaw-patch.json             ← openclaw.json patch to activate soul shard loading
 BOOTSTRAP.md                    ← run once on first session, then self-destructs
 soul-shards/
