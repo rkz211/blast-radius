@@ -1,0 +1,71 @@
+---
+description: The Blast Radius Protocol — structural discipline for AI-assisted development
+globs: ["**/*"]
+---
+
+# The Blast Radius Protocol
+
+Full whitepaper: https://github.com/rkz211/blast-radius
+
+## The Single Rule
+
+Structure every artifact so that any given edit touches only one concern. The agent working
+on a file cannot accidentally damage adjacent logic because adjacent logic is not in the file.
+
+## File Structure
+
+- Each file: ~80-100 lines, single concern. The threshold is a heuristic, not a law. Size is
+  the smell detector; concern count is the rule. A 130-line single-concern file is fine.
+  A 90-line two-concern file needs splitting.
+- Assembly layer (App.tsx or equivalent root): pure wiring only. Imports and composition.
+  Zero logic, zero ternaries. If it has a ternary, that belongs in a block.
+- When the assembly layer outgrows itself (~200+ lines): shard into section sub-assemblies.
+  App.tsx imports sections, each section imports blocks.
+
+## Contracts — Required on Every File
+
+Every new or modified file must start with:
+
+```ts
+// Input: what this block receives
+// Output: what this block produces or renders
+// Must never: the behaviors this block is prohibited from having
+```
+
+The "Must never" is a behavioral constraint, not documentation. Write it before the implementation.
+
+## Change Discipline
+
+- Make the smallest change that addresses the task. Do not touch adjacent code.
+- One concern per change. If a fix wants to touch two files, it is two changes.
+- When something breaks: identify the single block, rewrite only that block, everything else frozen.
+- Do NOT paste the whole file and ask "find the bug." That produces a new bug.
+
+## Versioning
+
+- For significant changes: create `block.v2.ts` alongside the original.
+- Swap the import only after verification. Original stays frozen until then.
+- Once v2 is stable: delete v1 in a dedicated commit. Dead versions must be cleaned up.
+
+## Known-Good Checkpoint
+
+Before any non-trivial change:
+- Confirm current state builds/runs.
+- Commit or tag so rollback is one action.
+- Never start from an unknown or broken state.
+
+## Verification — Required Before "Done"
+
+1. Type gate — `npx tsc --noEmit` passes.
+2. Build gate — `npm run build` clean.
+3. No unrelated files modified (`git diff` shows only intended changes).
+4. Orphan check — no version files (`.v1`, `.v2`) with no live import.
+5. Contracts present and accurate on all changed files.
+
+## Enforcement
+
+The protocol applies hardest when things are going worst. A cascade of failed builds means
+shard tighter and verify more — not bypass the discipline.
+
+Before every commit: *"If this breaks, is the damage contained to one file I can name?"*
+If no, the change is too big.

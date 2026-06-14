@@ -1,0 +1,37 @@
+---
+description: Enforce Input/Output/Must-never contracts on TypeScript and JavaScript files
+globs: ["**/*.{ts,tsx,js,jsx}"]
+---
+
+## Contract Format — Required
+
+Every new or significantly modified function, component, hook, or module must begin with:
+
+```ts
+// Input: what this block receives (props, arguments, store state)
+// Output: what this block produces (rendered JSX, return value, side effect)
+// Must never: behaviors this block is prohibited from having
+```
+
+## Examples
+
+```ts
+// Input: userId string from route params
+// Output: User object or null
+// Must never: modify database, send notifications, or throw unhandled errors
+
+// Input: auth store state via useAuthStore hook
+// Output: boolean isAuthenticated + current user object
+// Must never: fetch tokens directly, call sign-in methods, or redirect
+
+// Input: array of site objects from API response
+// Output: rendered grid of SiteCard components
+// Must never: fetch data, filter/sort logic, or manage selection state
+```
+
+## Rules
+
+- Write the contract BEFORE the implementation.
+- The "Must never" line is a hard constraint, not a suggestion.
+- When editing an existing file: update the contract if the behavior changed.
+- If you cannot write a one-line "Must never", the block has too many concerns — split it.

@@ -1,0 +1,32 @@
+---
+description: Recovery and debugging protocol when things break
+globs: ["**/*"]
+---
+
+## When Something Breaks
+
+1. Do NOT paste the whole file and search for the bug. That produces a new bug.
+2. Identify the single block that owns the broken concern.
+3. Read its contract (Input / Output / Must never).
+4. Read the logs or build output to prove which block and which line.
+5. Rewrite only that block. Everything else stays frozen.
+6. Re-run verification (type check, build, tests).
+7. If the change made it worse: revert to the known-good checkpoint immediately.
+
+## Diagnostic Logging First
+
+When you cannot trace an error:
+- Add detailed logging before changing logic.
+- Log raw inputs, key state, and decision points.
+- Prove the root cause from logs — do not guess and patch.
+- Remove logs only after root cause is proven.
+
+A fix applied without a proven cause is a new guess, not a fix.
+
+## Enforcement Under Pressure
+
+When builds keep failing or the task feels stuck:
+- This is the signal to shard tighter and verify more, NOT to bypass discipline.
+- Tempted to push without a type check → small changes ship broken most often. Run the gate.
+- Tempted to add a fix to an oversized file → break the file first, then fix.
+- Tempted to declare done because it built locally → not done until verified live.

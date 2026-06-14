@@ -69,8 +69,20 @@ This pack configures your OpenClaw agent to apply that constraint across four ar
 - **Agent behavior files**: soul shards loaded in order, memory shards by domain, MEMORY.md for operating rules only
 - **Verification**: concrete, domain-specific gates that define what "done" means — type check, build, deploy, live URL, version stamp
 
+## Platform Adaptations
+
+The full protocol is designed for OpenClaw agent workspaces, but the core ideas are portable. First-party adaptations for other platforms:
+
+| Platform | Location | What you get |
+|---|---|---|
+| **Claude Code** | `platforms/claude-code/CLAUDE.md` | Drop-in CLAUDE.md with full protocol: contracts, assembly layer, enforcement posture, verification gates, recovery |
+| **Cursor** | `platforms/cursor/.cursor/` | Rules + `/verify` slash command: contracts by file type, recovery protocol, verification gate |
+| **OpenClaw** | Root of this repo | Full pack: soul shards, memory shards, bootstrap, whitepaper |
+
+The Claude Code and Cursor versions carry the protocol's actual contributions — enforcement under pressure, assembly layer discipline, coupling tradeoff, verification against deployed state — not just "write clean code" advice.
+
 ## Read more
 
-See `blast-radius-v4.md` for the current full whitepaper. Prior versions (`blast-radius-v3.md`, `blast-radius-v2.md`) are retained for history.
+See `blast-radius-v4.md` for the current full whitepaper (v4.1). Prior versions (`blast-radius-v3.md`, `blast-radius-v2.md`) are retained for history.
 
 Original v1: https://docs.google.com/document/d/1FEloJIRTOzgiUR6mshfGJ_nIq_cohOBIgj369am4FLo

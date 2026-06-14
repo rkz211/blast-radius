@@ -1,0 +1,18 @@
+---
+description: Blast Radius verification gate — run before declaring any task done
+---
+
+Run the full verification gate on all files changed in this task:
+
+1. **Type gate** — Run `npx tsc --noEmit`. Must pass.
+2. **Build gate** — Run `npm run build`. Must complete clean.
+3. **Isolation check** — Run `git diff --name-only` and confirm only intended files changed.
+   If unrelated files were modified, flag them.
+4. **Contract check** — Every changed file has an accurate Input / Output / Must never contract
+   in its first three lines. If any are missing or stale, update them.
+5. **Orphan check** — Search for files with version markers (`.v1`, `.v2`, `-v1`, `-v2`) that
+   have no live import anywhere. If orphans exist, list them for cleanup.
+6. **One-line self-check** — "If this breaks, is the damage contained to one file I can name?"
+   If not, the change is too big.
+
+Report results clearly. Only confirm the task is complete if all gates pass.
