@@ -2,17 +2,19 @@
 
 ## The Problem This Solves
 
-Your AI agent is building real software. It's working. Features are shipping. Then the codebase hits a certain complexity and everything changes.
+There's a moment every developer using AI agents hits. The agent built the thing — beautifully, autonomously, fast. Features shipped. It worked. Then something breaks, and you realize the agent that designed and built it can't actually debug and fix it.
 
-You ask the agent to fix one bug and it introduces two more. You fix those and break something that was working an hour ago. The agent keeps rewriting adjacent logic, touching imports it didn't need to touch, restructuring functions that were fine. You're three hours into what should have been a ten-minute fix, and you're further from working than when you started.
+You watch it thrash. It rewrites adjacent logic. It touches imports it didn't need to touch. It fixes one bug and introduces two more. You fix those and break something that was working an hour ago. You're three hours into what should have been a ten-minute fix, and you're further from working than when you started.
 
-**That's the tailspin.** Every fix creates a new regression. You can't stomp them out because every stomp lands on something else. It circles and circles. The natural conclusion is: "AI can't do real development. It's fine for greenfield but it can't maintain a live system."
+**That's the panic.** Not that the agent made a mistake — mistakes are fine. The panic is that it *can't stop making them*. Every fix creates a new regression. Every regression creates a new fix. It circles and circles. The agent that built your system is now dismantling it in front of you, and you can't intervene fast enough to stop it.
+
+The natural conclusion is: "AI can build but it can't maintain. It's a prototype tool, not a production tool. Autonomous development doesn't work for real systems."
 
 We were ready to reach that conclusion. Then we tried something different: instead of fixing the agent, we fixed the structure. We broke every file down until each one had exactly one concern, put a contract at the top saying what it does and what it must never do, and made a rule that when something breaks, you rewrite only that file — everything else stays frozen.
 
 **The tailspin stopped.** Not gradually — it just stopped, like it had never been there. The agent couldn't create regressions in adjacent logic because adjacent logic wasn't in the file. Fixes either worked or they didn't, but they never broke something two components away.
 
-That's the entire protocol. Structure every artifact so the model can only break what it can see. The rest is how to apply it.
+The agent didn't get smarter. The structure got smaller. That's the entire protocol.
 
 ---
 
