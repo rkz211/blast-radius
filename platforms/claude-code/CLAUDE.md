@@ -4,6 +4,8 @@ This project follows the Blast Radius Protocol. Every change must have minimal, 
 
 Full whitepaper: https://github.com/rkz211/blast-radius
 
+v4.3 — June 2026
+
 ---
 
 ## The Single Rule
@@ -24,7 +26,7 @@ Not "one component" — one concern. A hook that fetches data is separate from a
 
 ### The Assembly Layer is Sacred
 
-`App.tsx` (or equivalent root) is pure wiring — imports and JSX composition only. Zero logic. Zero state management beyond top-level selection. Zero ternaries. If it has a ternary, that ternary belongs in a block.
+`App.tsx` (or equivalent root) is pure wiring — imports and JSX composition only. Zero logic. Zero state management beyond top-level selection. If a ternary appears in the assembly layer, treat it as a smell signal: conditional logic is creeping into the wiring. The concern that ternary represents — a display toggle, a feature gate, a layout switch — belongs in a block, not in the assembly layer. The word "sacred" does not mean "ternary syntax is banned" — it means the wiring layer is safest when purely declarative.
 
 **Why this matters:** When you shard a 400-line file into five 80-line blocks, you do not delete the complexity — you relocate it into the connections between blocks. The assembly layer is where all of that coupling is allowed to live, and nowhere else. When the wiring is the only place connections live, the wiring is the only place you look to understand them.
 

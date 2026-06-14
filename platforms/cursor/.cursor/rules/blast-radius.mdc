@@ -18,7 +18,9 @@ on a file cannot accidentally damage adjacent logic because adjacent logic is no
   the smell detector; concern count is the rule. A 130-line single-concern file is fine.
   A 90-line two-concern file needs splitting.
 - Assembly layer (App.tsx or equivalent root): pure wiring only. Imports and composition.
-  Zero logic, zero ternaries. If it has a ternary, that belongs in a block.
+  Zero logic. If a ternary appears in the assembly layer, treat it as a smell signal:
+  conditional logic is creeping into the wiring. The concern belongs in a block, not in
+  the wiring. "Sacred" means purely declarative, not "ternary syntax is banned."
 - When the assembly layer outgrows itself (~200+ lines): shard into section sub-assemblies.
   App.tsx imports sections, each section imports blocks.
 

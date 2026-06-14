@@ -67,7 +67,8 @@ The Claude Code and Cursor versions carry the protocol's actual contributions �
 ### What's in here
 
 ```
-blast-radius-v4.md              ← full whitepaper (current v4.1)
+blast-radius-v4.3.md            ← full whitepaper (current v4.3)
+blast-radius-v4.md              ← prior version (retained for history)
 blast-radius-v3.md              ← prior version (retained for history)
 blast-radius-v2.md              ← prior version (retained for history)
 openclaw-patch.json             ← openclaw.json patch to activate soul shard loading
@@ -88,7 +89,7 @@ platforms/
 
 ### How to apply (OpenClaw)
 
-1. Copy `soul-shards/`, `memory/`, `BOOTSTRAP.md`, and `blast-radius-v4.md` into your workspace
+1. Copy `soul-shards/`, `memory/`, `BOOTSTRAP.md`, and `blast-radius-v4.3.md` into your workspace
 2. Fill in `soul-shards/01-persona/SOUL.md` with your agent's persona
 3. Merge `openclaw-patch.json` into your `openclaw.json` (see patch file for instructions)
 4. Start a new session with Sonnet or Opus — BOOTSTRAP.md runs automatically
@@ -97,6 +98,6 @@ platforms/
 
 ## Read More
 
-See `blast-radius-v4.md` for the current full whitepaper (v4.1). Prior versions are retained for history.
+See `blast-radius-v4.3.md` for the current full whitepaper (v4.3). Prior versions are retained for history.
 
 Original v1: https://docs.google.com/document/d/1FEloJIRTOzgiUR6mshfGJ_nIq_cohOBIgj369am4FLo
