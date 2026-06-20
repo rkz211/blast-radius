@@ -1,0 +1,123 @@
+# Blast Radius Protocol — Advisory PR Check
+#
+# Runs blast-check.sh on every pull request and posts findings as a PR comment.
+# Advisory only — does not block merge. Set BLAST_STRICT: "1" to make it blocking.
+#
+# Setup: copy this file and tools/blast-check.sh into your repo.
+# No dependencies. No framework. Just a shell script and a workflow.
+
+name: Blast Radius Check
+
+on:
+  pull_request:
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+      - '**.py'
+      - '**.sh'
+      - '**.desc'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  blast-check:
+    name: Advisory Protocol Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history for --changed mode
+
+      - name: Run blast-check.sh
+        id: check
+        env:
+          # Set to "1" to fail the job when findings exist (blocking mode)
+          BLAST_STRICT: "0"
+        run: |
+          chmod +x tools/blast-check.sh
+
+          # Capture output, strip ANSI color codes for the PR comment
+          OUTPUT=$(bash tools/blast-check.sh --changed 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
+          echo "output<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$OUTPUT" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          # Count findings for the summary line
+          FINDING_COUNT=$(echo "$OUTPUT" | grep -c "⚠" || true)
+          echo "findings=$FINDING_COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Post PR Comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `${{ steps.check.outputs.output }}`;
+            const findings = parseInt('${{ steps.check.outputs.findings }}') || 0;
+            const marker = '<!-- blast-radius-check -->';
+
+            let body;
+            if (findings === 0) {
+              body = `${marker}
+            ### ✅ Blast Radius Check — Clean
+
+            No contract, orphan, assembly, or .desc findings on changed files.
+
+            <details>
+            <summary>Full output</summary>
+
+            \`\`\`
+            ${output}
+            \`\`\`
+
+            </details>
+
+            *Advisory only — [Blast Radius Protocol](https://github.com/rkz211/blast-radius)*`;
+            } else {
+              body = `${marker}
+            ### ⚠️ Blast Radius Check — ${findings} Finding(s)
+
+            These are **advisory** — they flag mechanical issues (missing contracts, orphaned versions, assembly logic, .desc gaps). They do not check whether contracts are *accurate*; only whether they *exist*.
+
+            \`\`\`
+            ${output}
+            \`\`\`
+
+            **What to do:**
+            - Missing contracts → add \`// Input: / Output: / Must never:\` to the top of the file
+            - Orphaned versions → delete dead \`.v1\`/\`.v2\` files or wire them back in
+            - Assembly logic → move conditional logic out of wiring files into blocks
+            - Missing \`.desc\` → add orientation file if using the Hologram Pyramid
+
+            *Advisory only — [Blast Radius Protocol](https://github.com/rkz211/blast-radius)*`;
+            }
+
+            // Find and update existing comment, or create new one
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

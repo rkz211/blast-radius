@@ -53,6 +53,8 @@ You don't need this if:
 
 **Already have a codebase?** See [`MIGRATION.md`](MIGRATION.md) for how to apply the protocol incrementally without a full rewrite.
 
+**Currently stuck in a regression loop?** Try the [`REPLICATION-CHALLENGE.md`](REPLICATION-CHALLENGE.md) — clone your environment, apply the protocol to the file that's breaking, and see if the code settles. Takes one session. Your results become evidence for or against the protocol.
+
 ---
 
 ## What It Does
@@ -92,6 +94,7 @@ The Claude Code and Cursor versions carry the protocol's actual contributions �
 ### What's in here
 
 ```
+REPLICATION-CHALLENGE.md        ← try the protocol on your own regression loop + report results
 MIGRATION.md                    ← how to apply the protocol to an existing codebase
 blast-radius-v4.3.md            ← full whitepaper (current v4.4)
 blast-radius-v4.md              ← prior version (retained for history)
@@ -121,6 +124,10 @@ tools/
                                    /verify and blast-check.sh are complementary:
                                    the script catches what a script can catch;
                                    /verify covers what only a human or agent can judge
+.github/workflows/
+  blast-check.yml               ← GitHub Action: runs blast-check.sh on PRs, posts advisory
+                                   comment with findings. Copy this + tools/blast-check.sh
+                                   into your repo. No dependencies, no framework.
 ```
 
 ### How to apply (OpenClaw)
