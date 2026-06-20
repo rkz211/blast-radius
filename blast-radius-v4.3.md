@@ -7,6 +7,7 @@
 **v4.1:** June 2026 — WIRING layer in .desc files, tool-use tradeoff acknowledgment, .desc maintenance gate
 **v4.2:** June 2026 — "When not to shard" exceptions, risk-tier versioning
 **v4.3:** June 2026 — Security shard scoping, ternary clarification, tool-use cost scenario, five-layer reference table, grep payoff examples, Hologram Pyramid + WIRING field status updates, optional verification tooling
+**v4.4:** June 2026 — Operational monitoring: agent-built traditional monitoring infrastructure, structured logging, polling/reporting systems, the "build what you can't be" pattern
 
 ---
 
@@ -36,6 +37,7 @@ That is the entire protocol. Everything below is how to apply it to each artifac
 - **v4.1** adds the **WIRING layer** to `.desc` files — dependency edges (who calls this block, what it calls) tracked independently from code, so adding a new caller never touches the called file. Acknowledges the **tool-use tradeoff** of heavy sharding (more files = more tool calls = more tokens) and positions the Hologram Pyramid as the mitigation. Adds a **`.desc` maintenance gate** to the verification checklist so orientation files don't drift from reality.
 - **v4.2** adds two refinements from external review. **"When not to shard"** — explicit exceptions where sharding is counterproductive (parsers, generated files, state machines, dense algorithms). **Risk-tier versioning** — distinguishes routine edits (commit and move on) from risky refactors (version alongside, verify, swap, clean up). Not every change needs a `.v2` file; Git handles rollback for normal work.
 - **v4.3** addresses seven items surfaced by external reviewers (GPT 5.5, Gemini, Grok) and internal production experience. **Security shard scoping** — the 00-security shard now distinguishes external-facing agents from development agents. **Ternary clarification** — "zero ternaries" was memorable but misleading; the concern is conditional logic in wiring, not the syntax itself. **Tool-use cost scenario** — replaces the abstract tradeoff acknowledgment with a concrete side-by-side comparison. **Five-layer reference table** — a structured quick-reference for the Hologram Pyramid layers. **Grep payoff examples** — concrete one-liners that show the feature slug and WIRING grep value immediately. **Field status updates** — the Hologram Pyramid and WIRING honest-status sections now reflect actual production usage. **Optional verification tooling** — a new Part VII introducing a lightweight, optional check script.
+- **v4.4** addresses the gap between development-time discipline and runtime health. **Operational monitoring** — a new Part VIII that establishes the pattern of agents building traditional, deterministic monitoring infrastructure rather than using LLM inference for ongoing system observation. **Structured logging** — every non-LLM action (cron execution, script runs, API calls, deployments) writes a structured log entry. **Polling and reporting** — traditional scripts parse logs on schedule, checking for errors, omissions, and anomalies. **The "build what you can't be" pattern** — the agent uses its speed-of-development advantage to build monitoring systems that are more reliable than itself for the monitoring task.
 
 ---
 
@@ -594,8 +596,151 @@ This is not "Blast Radius: The Framework." The protocol is structural discipline
 
 Same principle. Same mechanism. Different file type. Every domain now has a concrete definition of "done."
 
-The agent working on any one block cannot touch what is not in the file. Every block carries a map of the whole — including who calls it and what it calls. Dead versions are swept before the task closes. Completion is verified against the live environment, not the local one. That is the entire protocol.
+The agent working on any one block cannot touch what is not in the file. Every block carries a map of the whole — including who calls it and what it calls. Dead versions are swept before the task closes. Completion is verified against the live environment, not the local one.
 
 ---
 
-*No framework. No tooling. No dependencies. Structure the artifacts. Keep the files small. Give every fragment a map. Verify against reality. The model can only break what it can see.*
+## Part VIII — Operational Monitoring: Let the Agent Build What It Can't Be
+
+Parts I-VII govern the development cycle — structure, orientation, verification, deployment. The artifact ships. It works. The agent moves on.
+
+Then, sometime between sessions, it stops working. A cron silently fails. An API starts returning errors that nobody checks. A script runs but produces empty output. The system is degrading, and the agent — the thing responsible for maintaining it — doesn't know, because nobody asked it to look.
+
+### The Problem
+
+Agents are session-based. They act when invoked. Between sessions, nothing watches. And even within a session, an agent checking its own work through LLM inference is the same probabilistic, creative system that introduced the problem. It can miss errors. It can hallucinate health. It can investigate a failure and introduce a new one while fixing the old one — the same regression dynamic the rest of this protocol exists to prevent.
+
+The Blast Radius Protocol solves the regression problem during development. It does not solve the monitoring problem after deployment. A system with perfect single-concern files and verified deploys can still rot silently between maintenance sessions. The structural discipline that prevents regressions during edits does nothing to detect failures that happen when nobody is editing.
+
+This is the gap: **the agent is the maintainer, but it has no eyes between sessions.**
+
+### Why LLM Monitoring Fails
+
+The instinct is to use the agent as the monitor. Schedule it to wake up periodically, check the systems, report problems. This fails for three reasons:
+
+**Cost.** An LLM invocation to parse a log file, check a cron schedule, or verify an API response is orders of magnitude more expensive than a shell script doing the same thing. Monitoring is high-frequency, low-complexity work. It is the worst possible use of an LLM's capabilities.
+
+**Reliability.** The agent is a probabilistic system. Ask it to check whether a cron ran at 3am and it will usually get it right — but "usually" is not acceptable for monitoring. A monitor that misses one failure in twenty is not a monitor. It is a false sense of security. Traditional code either checks the log line or it doesn't. There is no "usually."
+
+**Blast radius.** An agent investigating a failure has the same regression risk as an agent fixing a bug. It reads the system, forms a theory, and acts on it. If the theory is wrong, the action makes things worse. A monitoring script that reads a log and reports what it finds cannot make things worse. It is read-only by construction. The blast radius of a traditional monitor is zero.
+
+### The Pattern
+
+The solution is not to make the agent a better monitor. It is to make the agent **build** the monitor — then get out of the way.
+
+Every action the agent takes that touches non-LLM infrastructure — cron execution, script runs, API calls, deployments, file writes, database operations — writes a structured log entry. Not a debug log. Not a print statement. A structured record with a timestamp, action type, target, result, and exit status.
+
+Then the agent writes a traditional polling system: a script that runs on a schedule, parses those logs, checks for errors and omissions, and reports findings through a deterministic channel. The script is traditional code — no LLM, no inference, no creativity. It either finds the error or it doesn't. It either reports or it doesn't. It does the same thing every time it runs.
+
+**The agent writes it once. The script runs forever.** That is the division of labor that plays to each system's strength.
+
+### What Gets Logged
+
+The rule: **if the agent did it and it touched something outside the LLM context, it gets a log entry.**
+
+| Action | Log Entry |
+|---|---|
+| Cron fires | Timestamp, cron ID, script called, exit code, duration |
+| Script executes | Timestamp, script name, arguments, exit code, stdout summary |
+| API call (outbound) | Timestamp, endpoint, method, status code, response time |
+| Deployment | Timestamp, target, version, deploy result, verification status |
+| File write (infrastructure) | Timestamp, file path, operation, bytes written |
+| Database mutation | Timestamp, table, operation, record count affected |
+
+The format does not matter — JSON lines, CSV, structured syslog. What matters is that every entry has enough information to answer: *"Did this action succeed, and when?"*
+
+### What Gets Polled
+
+The polling script answers three questions on every run:
+
+**1. Errors.** Did any logged action fail? Non-zero exit codes, HTTP 4xx/5xx responses, deployment failures, write errors. These are explicit — the log says something went wrong.
+
+**2. Omissions.** Did any expected action *not* happen? A cron that should have run at 3am but has no log entry at 3am. A daily backup script with no entry for today. A health check that should fire every 5 minutes but has a 30-minute gap. Omissions are harder to catch than errors because they are the absence of evidence rather than evidence of failure — but they are often more serious. A script that runs and fails is visible. A script that never runs is invisible.
+
+**3. Anomalies.** Did any action succeed but look wrong? A script that usually takes 2 seconds but took 45. An API that returned 200 but with an empty body. A deployment that succeeded but the version stamp doesn't match. These are judgment calls with fixed thresholds — not LLM judgment, but "if duration > 10x median, flag it."
+
+### The Reporting Channel
+
+The polling script's output goes through a deterministic channel — not back through the LLM. A message to a monitoring channel. An entry in a status dashboard. An alert to a pager. The report is a data summary, not a conversation. It does not need interpretation. It needs to be seen.
+
+If the polling script finds nothing wrong, it reports nothing — or reports a one-line "all clear" heartbeat so you know the monitor itself is running. A monitor that goes silent and a monitor that found nothing look identical from the outside. The heartbeat solves that.
+
+### Why Traditional Code Is the Right Tool
+
+This is the core insight: **traditional code's greatest strength is exactly what makes agents unreliable as monitors — it does the same thing every time.**
+
+A shell script that greps a log for non-zero exit codes will find every non-zero exit code, every time, forever. It will never get creative. It will never skip a check because it "seems fine." It will never introduce a regression while investigating a failure. It will never hallucinate that a missing log entry is actually present.
+
+That predictability — the thing that makes traditional code slow and expensive to write — is exactly what monitoring requires. And the agent eliminates the cost problem. It writes the monitoring script in minutes. The script then runs for months without modification, doing precisely what it was built to do.
+
+**The agent uses its comparative advantage — speed of development — to build systems that cover its comparative weakness — reliability of ongoing operations.** The result is a monitoring layer that is more reliable than the agent itself, built by the agent, at the agent's speed.
+
+### The Monitoring Script as a Blast Radius Artifact
+
+The monitoring scripts follow the same protocol as every other artifact:
+
+- **Single concern.** One script checks cron execution logs. A different script checks API response codes. A third checks deployment version stamps. They do not share files or mix concerns.
+- **Contract.** Each script has a docstring: what it reads, what it reports, what it must never do (modify, retry, fix — only observe and report).
+- **Orchestrator.** A single orchestrator script calls them in sequence. The orchestrator is pure delegation. The cron entry calls the orchestrator.
+- **Verification.** The monitoring scripts pass their own verification gate — run them against known-good logs and confirm correct output, run them against logs with injected failures and confirm detection.
+
+```python
+#!/usr/bin/env python3
+"""
+monitor-cron-health.py
+Input: cron execution log at /var/log/agent/cron.log
+Output: list of missed or failed cron jobs in the last 24 hours, printed to stdout
+Must never: modify any files, restart any services, or attempt to fix detected issues
+"""
+```
+
+The monitoring system is itself a Blast Radius artifact. It is subject to the same structural rules. When the monitoring script needs to change — new cron added, threshold adjusted — the agent edits one file with one concern. The blast radius of a monitoring change is one monitoring script.
+
+### What the Agent Does With the Report
+
+The agent's role is not to monitor. It is to **respond to monitoring reports.** When the polling system surfaces an error, an omission, or an anomaly, the agent is invoked — in a session, with context, with the specific finding as input. Now the agent is doing what it is good at: diagnosing a named problem with specific evidence, not scanning an entire system for vague "is everything OK?"
+
+This is the same principle as single-concern files applied to the agent's attention. Instead of asking the agent to hold the entire system's health in context, you give it one specific finding to investigate. The monitoring system did the scanning. The agent does the thinking. Each tool does what it is best at.
+
+### The Lifecycle
+
+1. **Agent builds the system.** Code, scripts, crons — following Parts I-IV.
+2. **Agent adds structured logging.** Every non-LLM action writes a log entry.
+3. **Agent writes monitoring scripts.** Traditional code, single-concern, with contracts.
+4. **Monitoring runs on schedule.** No LLM involved. Traditional cron → traditional script → structured report.
+5. **Findings route to the agent.** Specific, evidence-backed findings become agent session inputs.
+6. **Agent investigates and fixes.** One named problem, one file, blast radius contained.
+
+Steps 1-3 are done by the agent. Step 4 runs without the agent. Step 5 bridges the gap. Step 6 is the agent working under the protocol as usual.
+
+The agent builds the safety net, then the safety net watches the system, then the safety net tells the agent when something needs attention. The loop is closed without the agent needing to be continuously present.
+
+### Honest Limitations
+
+**The monitoring scripts are only as good as the agent that wrote them.** If the agent writes a cron health checker that looks for the wrong log format, it will miss failures. The verification gate (run against known-good and known-bad logs) catches this, but only if the test cases are representative.
+
+**Omission detection requires a schedule of expectations.** The polling script needs to know that cron X should run daily and script Y should run hourly. This expectation list is a separate artifact that must be maintained when crons or schedules change. If it drifts, the monitor misses things.
+
+**The monitoring system itself can fail silently.** This is the "who watches the watchmen" problem. The heartbeat pattern (report "all clear" on successful runs) mitigates but does not eliminate it. If the monitoring cron itself stops firing, the heartbeat stops, and someone needs to notice that silence. At some point, a human must be the final backstop.
+
+**This does not replace infrastructure monitoring.** CloudWatch, Datadog, uptime pings — those cover infrastructure-level health (is the server up, is the database responding). This protocol covers application-level health (did the agent's artifacts do what they were supposed to do). Both are necessary. Neither replaces the other.
+
+---
+
+## The Unified Table
+
+| Domain | Assembly Layer | Blocks | Contract | Orientation | Verification | Monitoring |
+|---|---|---|---|---|---|---|
+| Code | `App.tsx` — pure imports + JSX (scales to section sub-assemblies) | ~80-100 line single-concern files (heuristic, not law) | First 3 lines: Input / Output / Must never | `.desc` file: APP/SECTION/FEATURE/BLOCK/WIRING | Type → Build → Deploy → Live URL → Version stamp | Deployment logs → version stamp polling |
+| Scripts | Orchestrator — pure delegation | ~80-150 line single-concern scripts | Docstring: reads / writes / must never | `.desc` file: BLOCK/WIRING (who calls, what called) | Run → Output match → Negative check → Exit code | Execution logs → exit code + omission polling |
+| Crons | Cron entry — one script call | Script with all logic inside | Docstring on the script | `.desc` on the script: WIRING to cron entry | Structure → Script gate → Schedule parse | Cron logs → schedule adherence + gap detection |
+| Agent files | Bootstrap loader (soul-shards glob) | Soul shards + memory shards | First 3 lines of each shard | Shard header carries APP/SECTION | Isolation → Load order → Contract accuracy | — |
+| Monitoring | Monitor orchestrator — pure delegation | Single-concern monitor scripts | Docstring: reads / reports / must never modify | `.desc` with WIRING to cron + log sources | Run against known-good + injected-failure logs | Heartbeat confirms monitor itself is running |
+
+Same principle. Same mechanism. Different file type. Every domain now has a concrete definition of "done" — and a concrete definition of "still working."
+
+The agent working on any one block cannot touch what is not in the file. Every block carries a map of the whole — including who calls it and what it calls. Dead versions are swept before the task closes. Completion is verified against the live environment, not the local one. And traditional monitoring infrastructure — built by the agent, run without the agent — confirms the system stays healthy between sessions. That is the entire protocol.
+
+---
+
+*No framework. No tooling. No dependencies. Structure the artifacts. Keep the files small. Give every fragment a map. Verify against reality. Monitor with traditional code. The model can only break what it can see — and the monitor watches what the model can't.*

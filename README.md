@@ -67,6 +67,7 @@ That means:
 - **Crons**: One entry, one script call. No inline logic.
 - **Agent behavior files**: Sharded into small, numbered modules loaded in order. Updating the agent's persona can't accidentally damage its security rules because they're in different files.
 - **Verification**: Concrete gates that define what "done" means — type check, build, deploy, live URL confirmation. Not vibes. Not "it compiled locally."
+- **Monitoring**: The agent writes traditional, deterministic monitoring infrastructure — structured logging, polling scripts, heartbeat reporting — that watches the system between sessions without LLM involvement. The agent builds what it can't be: a reliable, predictable observer.
 
 The protocol also includes an enforcement mechanism — a dedicated behavioral shard that keeps the agent on protocol under pressure. Because the moment things start breaking is exactly when agents abandon discipline, and that's exactly when discipline matters most.
 
@@ -92,7 +93,7 @@ The Claude Code and Cursor versions carry the protocol's actual contributions �
 
 ```
 MIGRATION.md                    ← how to apply the protocol to an existing codebase
-blast-radius-v4.3.md            ← full whitepaper (current v4.3)
+blast-radius-v4.3.md            ← full whitepaper (current v4.4)
 blast-radius-v4.md              ← prior version (retained for history)
 blast-radius-v3.md              ← prior version (retained for history)
 blast-radius-v2.md              ← prior version (retained for history)
@@ -145,6 +146,6 @@ If you try it: [open an issue](https://github.com/rkz211/blast-radius/issues), s
 
 ## Read More
 
-See `blast-radius-v4.3.md` for the current full whitepaper (v4.3). Prior versions are retained for history.
+See `blast-radius-v4.3.md` for the current full whitepaper (v4.4). Prior versions are retained for history.
 
 Original v1: https://docs.google.com/document/d/1FEloJIRTOzgiUR6mshfGJ_nIq_cohOBIgj369am4FLo
